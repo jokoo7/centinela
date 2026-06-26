@@ -50,7 +50,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="contoh: Budi Santoso"
+                  placeholder="Bahlil Ganteng"
                   autoComplete="name"
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
@@ -71,7 +71,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="contoh: budi_santoso"
+                  placeholder="e.g. bahlil_ganteng"
                   autoComplete="username"
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
@@ -92,7 +92,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="nama@gmail.com"
+                  placeholder="your@gmail.com"
                   autoComplete="email"
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
@@ -113,7 +113,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Buat kata sandi"
+                  placeholder="Password"
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
@@ -132,7 +132,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
         </form.Subscribe>
       </FieldGroup>
       <FieldDescription className="text-center">
-        Sudah punya akun? <Link href="/login">Login</Link>
+        Already have an account? <Link href="/login">Login</Link>
       </FieldDescription>
     </form>
   );

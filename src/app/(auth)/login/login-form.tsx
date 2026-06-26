@@ -47,7 +47,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Masukkan username"
+                  placeholder="Enter your username"
                   autoComplete="username"
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
@@ -77,7 +77,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
                   value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Masukkan kata sandi"
+                  placeholder="Enter your password"
                 />
                 {isInvalid && <FieldError errors={field.state.meta.errors} />}
               </Field>
@@ -96,7 +96,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
         </form.Subscribe>
       </FieldGroup>
       <FieldDescription className="text-center">
-        Belum punya akun? <Link href="/register">Register</Link>
+        Don&apos;t have an account? <Link href="/register">Register</Link>
       </FieldDescription>
     </form>
   );

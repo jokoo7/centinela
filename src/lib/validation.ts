@@ -27,3 +27,22 @@ export const registerSchema = z.object({
   email: z.email(),
   password: passwordSchema,
 });
+
+export const masterPasswordSchema = z
+  .string()
+  .min(8, 'Master password minimal 8 karakter')
+  .regex(/^[^-]*$/, 'Master password tidak boleh mengandung -');
+
+export const setupMasterPasswordSchema = z
+  .object({
+    masterPassword: masterPasswordSchema,
+    confirmMasterPassword: z.string().min(1, 'Konfirmasi password wajib diisi'),
+  })
+  .refine((data) => data.masterPassword === data.confirmMasterPassword, {
+    error: 'Konfirmasi password tidak cocok',
+    path: ['confirmMasterPassword'],
+  });
+
+export const unlockVaultSchema = z.object({
+  masterPassword: z.string().min(1, 'Master password wajib diisi'),
+});

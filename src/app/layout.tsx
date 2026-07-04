@@ -1,21 +1,11 @@
 import type { Metadata } from 'next';
-import { DM_Sans, Space_Mono } from 'next/font/google';
+import { Architects_Daughter } from 'next/font/google';
 import './globals.css';
 
-const fontSans = DM_Sans({
+const fontSans = Architects_Daughter({
   subsets: ['latin'],
   variable: '--font-sans',
-});
-
-const fontSerif = DM_Sans({
-  subsets: ['latin'],
-  variable: '--font-serif',
-});
-
-const fontMono = Space_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  weight: ['400', '700'],
+  weight: ['400'],
 });
 
 export const metadata: Metadata = {
@@ -30,11 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={` ${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+      <body className={` ${fontSans.variable} antialiased`}>{children}</body>
     </html>
   );
 }

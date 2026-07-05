@@ -114,24 +114,79 @@ Master Password + vaultSalt
 Ringkasan model utama (lihat [`prisma/schema.prisma`](./prisma/schema.prisma) untuk detail lengkap):
 
 ```prisma
+enum VaultItemType {
+  LOGIN
+  NOTE
+}
+
 model User {
   // ...field Better Auth lainnya
-  vaultSalt  String?  // bukan rahasia, untuk re-derive Encryption Key
+  vaultSalt  String
   vaultItems VaultItem[]
 }
 
 model VaultItem {
   id         String  @id @default(cuid())
-  userId     String
-  title      String  // plain — untuk list & search di dashboard
-  category   String?
-  url        String?
-  ciphertext String  @db.Text // hasil enkripsi: username, password, notes
-  iv         String  // initialization vector, unik tiap item
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+   // --- Metadata (plaintext) ---
+  type     VaultItemType @default(LOGIN)
+  title    String
+  url      String?
+  favorite Boolean       @default(false)
+
+  // --- Encrypted payload ---
+  ciphertext String // base64: JSON berisi username, password, notes, dll
+  iv         String // base64: IV unik, generate baru tiap encrypt
+  encVersion Int    @default(1) // buat future-proofing algoritma enkripsi
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, type])
 }
 ```
 
-**Catatan desain:** `title`, `category`, dan `url` disimpan plain agar dashboard bisa menampilkan daftar vault item tanpa perlu mendekripsi semuanya terlebih dahulu. Data sensitif (username, password, notes) digabung jadi satu JSON lalu dienkripsi sebagai satu `ciphertext`.
+Isi data dalam Encrypted payload
+
+```ts
+// IDENTIFIER — cara user login (bisa lebih dari satu per akun)
+export type Identifier =
+  | { identifierType: 'USERNAME'; value: string }
+  | { identifierType: 'EMAIL'; value: string }
+  | { identifierType: 'PHONE'; value: string };
+
+// CREDENTIAL — jenis "kunci" akun (password, PIN, dst)
+export type Credential =
+  | { credentialType: 'PASSWORD'; value: string }
+  | { credentialType: 'PIN'; value: string };
+
+export interface CredentialHistoryEntry {
+  credential: Credential;
+  changedAt: string; // ISO date string
+}
+
+// ACCOUNT — struktur untuk vault item type "ACOUNT"
+export interface AccountData {
+  identifiers: Identifier[];
+  credential: Credential;
+  totpSecret?: string;
+  notes?: string;
+  credentialHistory?: CredentialHistoryEntry[];
+}
+
+// NOTE — struktur untuk vault item type "NOTE"
+export interface NoteData {
+  content: string;
+}
+
+// DISCRIMINATED UNION — gabungan semua type vault item
+export type VaultItemData = { type: 'LOGIN'; data: LoginData } | { type: 'NOTE'; data: NoteData };
+```
+
+**Catatan desain:** `title` dan `url` disimpan plain agar dashboard bisa menampilkan daftar vault item tanpa perlu mendekripsi semuanya terlebih dahulu. Data sensitif (username, password, notes) digabung jadi satu JSON lalu dienkripsi sebagai satu `ciphertext`.
 
 ---
 

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 
-export default function DeleteVaultForm() {
+export default function DeleteVault() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>

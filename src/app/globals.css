@@ -193,6 +193,6 @@
     letter-spacing: var(--tracking-normal);
   }
   html {
-    @apply font-sans;
+    @apply min-w-[375px] font-sans;
   }
 }

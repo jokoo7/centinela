@@ -1,4 +1,5 @@
 import Navbar from '@/components/navbar';
+import WrapperContent from '@/components/wrapper-content';
 import React from 'react';
 
 export default function layout({
@@ -9,7 +10,7 @@ export default function layout({
   return (
     <main className="relative flex min-h-screen flex-col">
       <Navbar />
-      {children}
+      <WrapperContent className="my-12">{children}</WrapperContent>
     </main>
   );
 }

@@ -5,7 +5,7 @@ import LoadingButton from '@/components/loading-button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { registerSchema } from '@/lib/validation';
+import { registerSchema } from '@/validation/auth-schema';
 import { useForm } from '@tanstack/react-form';
 import Link from 'next/link';
 import React from 'react';

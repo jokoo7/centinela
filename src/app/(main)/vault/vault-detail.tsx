@@ -1,3 +1,5 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -7,37 +9,92 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
-import React from 'react';
+import { VaultItem } from '@/types/vault-type';
+import { Check, EyeOff } from 'lucide-react';
+import Link from 'next/link';
 
 interface VaultDetailProps extends React.ComponentProps<typeof Dialog> {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  vault: VaultItem | null;
 }
 
-export function VaultDetail({ open, onOpenChange, ...props }: VaultDetailProps) {
+export default function VaultDetail({ open, onOpenChange, vault, ...props }: VaultDetailProps) {
+  if (!vault) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange} {...props}>
-      <DialogTrigger></DialogTrigger>
-      <DialogContent>
+      <DialogContent
+      // onCloseAutoFocus={(e) => {
+      //   e.preventDefault();
+      // }}
+      >
         <DialogHeader>
-          <DialogTitle>Sticky Footer</DialogTitle>
+          <DialogTitle>Vault Detail</DialogTitle>
           <DialogDescription>
-            This dialog has a sticky footer that stays visible while the content scrolls.
+            View the complete information stored in this vault item
           </DialogDescription>
         </DialogHeader>
         <div className="-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
-          {Array.from({ length: 10 }).map((_, index) => (
-            <p key={index} className="mb-4 leading-normal">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-              mollit anim id est laborum.
-            </p>
-          ))}
+          <div className="flex flex-col">
+            <h2 className="mb-3 text-base font-medium">{vault.title}</h2>
+            <div className="space-y-2">
+              {vault.type === 'ACCOUNT' && (
+                <>
+                  {vault.data.email && (
+                    <>
+                      <label className="text-sm text-muted-foreground">Email</label>
+                      <p className="font-mono text-foreground">{vault.data.email}</p>
+                    </>
+                  )}
+                  {vault.data.username && (
+                    <>
+                      <label className="text-sm text-muted-foreground">Username</label>
+                      <p className="font-mono text-foreground">{vault.data.username}</p>
+                    </>
+                  )}
+                  {vault.data.phone && (
+                    <>
+                      <label className="text-sm text-muted-foreground">Phone</label>
+                      <p className="font-mono text-foreground">{vault.data.phone}</p>
+                    </>
+                  )}
+                </>
+              )}
+
+              {vault.url && (
+                <div>
+                  <label className="text-sm text-muted-foreground">URL</label>
+                  <Link
+                    href={vault.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-primary hover:underline"
+                  >
+                    {vault.url}
+                  </Link>
+                </div>
+              )}
+
+              <div>
+                <label className="text-sm text-muted-foreground">
+                  {vault.type === 'ACCOUNT' ? 'Password' : 'Content'}
+                </label>
+                <div className="mt-1 flex gap-2">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <EyeOff className="h-4 w-4" />
+                    Hide
+                  </Button>
+
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Check className="h-4 w-4" />
+                    Copied
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <DialogFooter>
           <DialogClose asChild>

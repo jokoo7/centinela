@@ -131,10 +131,10 @@ model VaultItem {
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
    // --- Metadata (plaintext) ---
-  type     VaultItemType @default(LOGIN)
+  type     VaultItemType @default(ACCOUNT)
   title    String
   url      String?
-  favorite Boolean       @default(false)
+  pinned Boolean       @default(false)
 
   // --- Encrypted payload ---
   ciphertext String // base64: JSON berisi username, password, notes, dll
@@ -152,38 +152,56 @@ model VaultItem {
 Isi data dalam Encrypted payload
 
 ```ts
-// IDENTIFIER — cara user login (bisa lebih dari satu per akun)
-export type Identifier =
-  | { identifierType: 'USERNAME'; value: string }
-  | { identifierType: 'EMAIL'; value: string }
-  | { identifierType: 'PHONE'; value: string };
+export type CredentialType = 'PASSWORD' | 'PIN';
+export type VaultItemType = 'ACCOUNT' | 'NOTE';
 
-// CREDENTIAL — jenis "kunci" akun (password, PIN, dst)
-export type Credential =
-  | { credentialType: 'PASSWORD'; value: string }
-  | { credentialType: 'PIN'; value: string };
-
+// Credential History
 export interface CredentialHistoryEntry {
-  credential: Credential;
-  changedAt: string; // ISO date string
+  type: CredentialType;
+  value: string;
+  changedAt: string;
 }
 
-// ACCOUNT — struktur untuk vault item type "ACOUNT"
+// Type ACCOUNT
 export interface AccountData {
-  identifiers: Identifier[];
-  credential: Credential;
-  totpSecret?: string;
+  email?: string;
+  username?: string;
+  phone?: string;
+  password?: string;
+  pin?: string;
   notes?: string;
+
   credentialHistory?: CredentialHistoryEntry[];
 }
+// Type khusus form tanpa `dredentialHistory`
+export type AccountFormData = Omit<AccountData, 'credentialHistory'>;
 
-// NOTE — struktur untuk vault item type "NOTE"
+// Type NOTE
 export interface NoteData {
   content: string;
 }
 
-// DISCRIMINATED UNION — gabungan semua type vault item
-export type VaultItemData = { type: 'LOGIN'; data: LoginData } | { type: 'NOTE'; data: NoteData };
+export type VaultItemPlaintext =
+  | { type: 'ACCOUNT'; data: AccountData }
+  | { type: 'NOTE'; data: NoteData };
+
+// Plaintext khusus form
+export type VaultItemFormPlaintext =
+  | { type: 'ACCOUNT'; data: AccountFormData }
+  | { type: 'NOTE'; data: NoteData };
+
+// Metadata Vault
+export interface VaultItemMetadata {
+  title: string;
+  url?: string;
+  pinned: boolean;
+}
+
+// type gabungan metadata + vault
+export type VaultItem = VaultItemMetadata & { id: string } & VaultItemPlaintext;
+
+// type gabungan metadata + vault tanpa `credentialHistoty`
+export type VaultItemFormValues = VaultItemMetadata & VaultItemFormPlaintext;
 ```
 
 **Catatan desain:** `title` dan `url` disimpan plain agar dashboard bisa menampilkan daftar vault item tanpa perlu mendekripsi semuanya terlebih dahulu. Data sensitif (username, password, notes) digabung jadi satu JSON lalu dienkripsi sebagai satu `ciphertext`.

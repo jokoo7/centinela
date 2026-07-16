@@ -5,7 +5,7 @@ import LoadingButton from '@/components/loading-button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { loginSchema } from '@/lib/validation';
+import { loginSchema } from '@/validation/auth-schema';
 import { useForm } from '@tanstack/react-form';
 import Link from 'next/link';
 import React from 'react';
@@ -63,13 +63,6 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
               <Field data-invalid={isInvalid} className="text-start">
                 <div className="flex items-center">
                   <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                  {/* COMMING SOON */}
-                  {/* <Link
-                    href="#"
-                    className="ml-auto text-sm text-muted-foreground underline hover:text-primary"
-                  >
-                    Lupa password?
-                  </Link> */}
                 </div>
                 <InputPassword
                   id={field.name}

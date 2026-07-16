@@ -1,13 +1,13 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { unlockVaultSchema } from '@/lib/validation';
 import { useForm } from '@tanstack/react-form';
 import React from 'react';
 import LoadingButton from '@/components/loading-button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import Link from 'next/link';
 import { InputPassword } from '@/components/input-password';
+import { unlockVaultSchema } from '@/validation/auth-schema';
 
 export default function UnlockForm({ className, ...props }: React.ComponentProps<'form'>) {
   const form = useForm({

@@ -4,10 +4,8 @@ import * as z from 'zod';
 const phonePattern = /^[0-9+()\- ]+$/;
 const pinPattern = /^\d{4,12}$/;
 
-// ACCOUNT SCHEMA
 export const accountDataSchema = z
   .object({
-    /**Identifier */
     email: z.string().trim().pipe(z.email('Format email tidak valid')).optional().or(z.literal('')),
     username: z.string().trim().optional(),
     phone: z
@@ -17,7 +15,6 @@ export const accountDataSchema = z
       .optional()
       .or(z.literal('')),
 
-    /**Credential */
     password: z.string().optional(),
     pin: z
       .string()
@@ -28,7 +25,6 @@ export const accountDataSchema = z
     notes: z.string().max(2000, 'Catatan maksimal 2000 karakter').optional(),
   })
   .superRefine((data, ctx) => {
-    /** Minimal 1 identifier wajib diisi */
     const hasIdentifier = Boolean(data.email || data.username || data.phone);
     if (!hasIdentifier) {
       const message = 'Minimal isi salah satu: email, username, atau nomor telepon';
@@ -37,7 +33,6 @@ export const accountDataSchema = z
       ctx.addIssue({ code: 'custom', message, path: ['phone'] });
     }
 
-    /** Minimal 1 credential wajib diisi */
     const hasCredential = Boolean(data.password || data.pin);
     if (!hasCredential) {
       const message = 'Minimal isi salah satu: password atau PIN';
@@ -46,7 +41,6 @@ export const accountDataSchema = z
     }
   });
 
-// NOTE SCHEMA
 export const noteDataSchema = z.object({
   content: z
     .string()
@@ -56,14 +50,12 @@ export const noteDataSchema = z.object({
     }),
 });
 
-// METADATA
 export const metadataSchema = z.object({
   title: z.string().trim().min(1, 'Title wajib diisi.').max(100, 'Maksimal 100 karakter'),
   url: z.string().trim().pipe(z.url('Format URL tidak valid')).optional().or(z.literal('')),
   pinned: z.boolean(),
 });
 
-/** Schema final untuk FORM  */
 export const vaultItemFormSchema = z.discriminatedUnion('type', [
   metadataSchema.extend({
     type: z.literal('ACCOUNT'),

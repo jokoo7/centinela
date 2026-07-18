@@ -115,7 +115,7 @@ Ringkasan model utama (lihat [`prisma/schema.prisma`](./prisma/schema.prisma) un
 
 ```prisma
 enum VaultItemType {
-  LOGIN
+  ACCOUNT
   NOTE
 }
 

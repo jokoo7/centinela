@@ -19,8 +19,6 @@ export interface AccountData {
 
   credentialHistory?: CredentialHistoryEntry[];
 }
-// Type khusus form tanpa `dredentialHistory`
-export type AccountFormData = Omit<AccountData, 'credentialHistory'>;
 
 // Type NOTE
 export interface NoteData {
@@ -31,11 +29,6 @@ export type VaultItemPlaintext =
   | { type: 'ACCOUNT'; data: AccountData }
   | { type: 'NOTE'; data: NoteData };
 
-// Plaintext khusus form
-export type VaultItemFormPlaintext =
-  | { type: 'ACCOUNT'; data: AccountFormData }
-  | { type: 'NOTE'; data: NoteData };
-
 // Metadata Vault
 export interface VaultItemMetadata {
   title: string;
@@ -44,7 +37,11 @@ export interface VaultItemMetadata {
 }
 
 // type gabungan metadata + vault
-export type VaultItem = VaultItemMetadata & { id: string } & VaultItemPlaintext;
+export type VaultItem = VaultItemMetadata & {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+} & VaultItemPlaintext;
 
 // type gabungan metadata + vault tanpa `credentialHistoty`
-export type VaultItemFormValues = VaultItemMetadata & VaultItemFormPlaintext;
+export type VaultItemFormValues = VaultItemMetadata & VaultItemPlaintext;

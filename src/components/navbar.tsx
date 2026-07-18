@@ -28,20 +28,6 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <InputGroup className="max-w-xs min-w-[10rem]">
-            <InputGroupInput placeholder="Search..." />
-            <InputGroupAddon>
-              <Search />
-            </InputGroupAddon>
-            <InputGroupAddon align="inline-end" className="text-xs">
-              12 results
-            </InputGroupAddon>
-          </InputGroup>
-
-          {/* <Button>
-            <Plus className="h-4 w-4" />
-          </Button> */}
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">

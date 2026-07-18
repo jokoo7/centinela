@@ -364,20 +364,22 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
                       </div>
 
                       <form.Field name="data.notes">
-                        {(field) => (
-                          <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                              Note (opsional)
-                            </label>
-                            <Textarea
-                              value={field.state.value as string}
-                              onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              rows={3}
-                              className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-500 dark:border-neutral-700 dark:bg-neutral-900"
-                            />
-                          </div>
-                        )}
+                        {(field) => {
+                          const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                          return (
+                            <Field data-invalid={isInvalid} className="text-start">
+                              <FieldLabel htmlFor={field.name}>Note (opsional)</FieldLabel>
+                              <Textarea
+                                id={field.name}
+                                value={field.state.value as string}
+                                onBlur={field.handleBlur}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                placeholder="Type your secure note here."
+                              />
+                              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                            </Field>
+                          );
+                        }}
                       </form.Field>
                     </div>
                   ) : (

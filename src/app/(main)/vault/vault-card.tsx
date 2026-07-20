@@ -27,7 +27,7 @@ export default function VaultCard({ vault, Icon, setVault, setDetailOpen }: Vaul
         setDetailOpen(true);
       }}
     >
-      <CardContent className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="h-fit w-fit shrink-0 rounded-md bg-primary/10 p-2.5 transition-colors group-hover:bg-primary/15">
           <Icon className="h-5 w-5 text-primary" />
         </div>

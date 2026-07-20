@@ -111,7 +111,7 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
             <span className="sr-only">Edit</span>
           </Button>
         ) : (
-          <Button>
+          <Button className="w-full">
             <CirclePlus />
             Add new vault
           </Button>
@@ -300,7 +300,7 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
                                   inputMode="tel"
                                   placeholder="+62 812-xxxx-xxxx"
                                   autoComplete="tel"
-                                  pattern="[0-9+()\- ]*"
+                                  // pattern="[0-9+()\- ]*"
                                   value={field.state.value as string}
                                   onBlur={field.handleBlur}
                                   onChange={(e) => field.handleChange(e.target.value)}

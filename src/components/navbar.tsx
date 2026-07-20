@@ -1,7 +1,6 @@
 import { cn } from '@/lib/utils';
 import WrapperContent from './wrapper-content';
-import { CircleUserRound, LogOutIcon, Search, UserRoundKey, Vault } from 'lucide-react';
-import { InputGroup, InputGroupAddon, InputGroupInput } from './ui/input-group';
+import { CircleUserRound, LogOutIcon, UserRoundKey, Vault } from 'lucide-react';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -40,13 +39,17 @@ export default function Navbar() {
             <DropdownMenuContent align="end">
               <DropdownMenuGroup>
                 <DropdownMenuLabel>@jokombur</DropdownMenuLabel>
-                <DropdownMenuItem>
-                  <CircleUserRound />
-                  <Link href="/account">Account</Link>
+                <DropdownMenuItem asChild>
+                  <Link href="/account">
+                    <CircleUserRound />
+                    Account
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Vault />
-                  <Link href="/vault">Vault</Link>
+                <DropdownMenuItem asChild>
+                  <Link href="/vault">
+                    <Vault />
+                    Vault
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem variant="destructive">
                   <LogOutIcon />

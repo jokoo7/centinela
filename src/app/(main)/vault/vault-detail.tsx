@@ -31,14 +31,14 @@ export default function VaultDetail({ open, onOpenChange, vault, ...props }: Vau
       // }}
       >
         <DialogHeader>
-          <DialogTitle>Vault Detail</DialogTitle>
+          <DialogTitle>{vault.title}</DialogTitle>
           <DialogDescription>
             View the complete information stored in this vault item
           </DialogDescription>
         </DialogHeader>
         <div className="-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
           <div className="flex flex-col">
-            <h2 className="mb-3 text-base font-medium">{vault.title}</h2>
+            {/* <h2 className="mb-3 text-base font-medium">{vault.title}</h2> */}
             <div className="space-y-2">
               {vault.type === 'ACCOUNT' && (
                 <>

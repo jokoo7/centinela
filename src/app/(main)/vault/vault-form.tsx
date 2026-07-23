@@ -24,13 +24,14 @@ import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@tanstack/react-form';
-import { CirclePlus, Edit2 } from 'lucide-react';
+import { Edit2, Plus } from 'lucide-react';
 import LoadingButton from '@/components/loading-button';
 import { VaultItemFormValues, VaultItemMetadata, VaultItemPlaintext } from '@/types/vault-type';
 import { vaultItemFormSchema } from '@/validation/vault-schema';
 import { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { InputPassword } from '@/components/input-password';
+import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group';
 
 function defaultAccountValues(): VaultItemFormValues {
   return {
@@ -102,19 +103,17 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
     <Dialog onOpenChange={(c) => !c && form.reset()}>
       <DialogTrigger asChild>
         {isEditMode ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-          >
-            <Edit2 className="h-4 w-4" />
-            <span className="sr-only">Edit</span>
+          <Button variant="secondary" size="icon">
+            <Edit2 />
           </Button>
         ) : (
-          <Button className="w-full">
-            <CirclePlus />
-            Add new vault
-          </Button>
+          <ButtonGroup>
+            <Button>Add New Vault</Button>
+            <ButtonGroupSeparator />
+            <Button size="icon">
+              <Plus />
+            </Button>
+          </ButtonGroup>
         )}
       </DialogTrigger>
       <DialogContent>

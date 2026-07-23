@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import VaultForm from './vault-form';
-import { Pin, Search, StickyNote, UserRound, UserRoundKey } from 'lucide-react';
+import { FileText, Pin, Search, UserRound, UserRoundKey } from 'lucide-react';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { VaultItem, VaultItemType } from '@/types/vault-type';
 import { useMemo, useOptimistic, useState, useTransition } from 'react';
@@ -64,7 +64,7 @@ export default function VaultClient({ initialVaults }: { initialVaults: VaultIte
 
   const typeIcons = {
     ACCOUNT: UserRound,
-    NOTE: StickyNote,
+    NOTE: FileText,
   };
 
   return (

@@ -18,13 +18,8 @@ export default function DeleteVault() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-        >
-          <Trash2 className="h-4 w-4" />
-          <span className="sr-only">Delete</span>
+        <Button variant="destructive" size="icon">
+          <Trash2 />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent size="sm">

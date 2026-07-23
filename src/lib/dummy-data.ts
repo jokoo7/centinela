@@ -7,8 +7,8 @@ export const dummyVaultItems: VaultItem[] = [
     url: 'https://mail.google.com',
     pinned: true,
     type: 'ACCOUNT',
-    createdAt: '2024-01-10T08:30:00.000Z',
-    updatedAt: '2025-06-12T14:15:00.000Z',
+    createdAt: '2026-01-10T08:30:00.000Z',
+    updatedAt: '2026-07-12T14:15:00.000Z',
     data: {
       email: 'budi.santoso@gmail.com',
       username: 'budisantoso',

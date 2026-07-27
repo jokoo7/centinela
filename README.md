@@ -9,9 +9,10 @@
 ## ✨ Fitur Utama
 
 - 🔑 **End-to-end encryption** — data dienkripsi/didekripsi sepenuhnya di client (browser), menggunakan **AES-256-GCM**
-- 🧂 **Key derivation aman** — Master Password diubah jadi Encryption Key lewat **PBKDF2-SHA256** (600.000 iterasi, sesuai rekomendasi OWASP 2024+)
+- 🧂 **Key derivation aman** — Master Password diubah jadi kunci lewat **PBKDF2-SHA256** (600.000 iterasi, sesuai rekomendasi OWASP 2024+)
+- 🗝️ **Dua lapis kunci (envelope encryption)** — `vaultKey` (kunci asli yang mengenkripsi vault item) dipisah dari `masterKey` (kunci turunan Master Password yang cuma membungkus `vaultKey`). Ganti Master Password tidak perlu membongkar ulang seluruh vault
 - 🚫 **Master Password tidak pernah dikirim ke server** — hanya digunakan untuk derive key di browser
-- 🧠 **Encryption Key hanya hidup di memory** — otomatis hilang saat refresh halaman, memaksa re-derive dari Master Password
+- 🧠 **Kunci hanya hidup di memory** — `masterKey` dan `vaultKey` otomatis hilang saat refresh halaman, memaksa re-derive dari Master Password
 - 🔒 **Autentikasi terpisah** — login/register dikelola oleh [Better Auth](https://www.better-auth.com/), independen dari sistem enkripsi vault
 - ✅ **Integritas data terjamin** — AES-GCM punya _authentication tag_ built-in, otomatis mendeteksi password salah atau data yang di-tamper
 
@@ -25,29 +26,45 @@ graph TD
         Auth["Better Auth: Login/Register"]
         MP_Input["User Input: Master Password"]
         PBKDF2["PBKDF2 Function"]
-        EK["Encryption Key - di memory, hilang saat refresh"]
+        MK["masterKey - di memory, hilang saat refresh"]
+        VaultKeyGen["vaultKey - random, dibuat sekali saat setup Master Password"]
+        Wrap["Wrap - encrypt vaultKey pakai masterKey"]
+        Unwrap["Unwrap - decrypt encryptedVaultKey pakai masterKey"]
         PlainData["Plaintext Data - sebelum dienkripsi"]
         Encrypt_Proc["Encryption Process - AES-GCM"]
         Decrypt_Proc["Decryption Process - AES-GCM"]
     end
     subgraph Server["SERVER and DATABASE - Prisma"]
-        UserTable["User Table: id, email, password hash, vaultSalt"]
+        UserTable["User Table: id, email, password hash, vaultSalt, encryptedVaultKey"]
         VaultTable["VaultItem Table: title, category, url plain - ciphertext, iv encrypted"]
     end
+
     Auth --> MP_Input
     MP_Input --> PBKDF2
-    PBKDF2 -->|generates| EK
-    PBKDF2 -.->|generated once at setup| VS_Gen["vaultSalt"]
+    PBKDF2 -->|generates| MK
+    PBKDF2 -.->|vaultSalt generated once at register| VS_Gen["vaultSalt"]
     VS_Gen -->|stored in| UserTable
-    PlainData --> Encrypt_Proc
-    EK --> Encrypt_Proc
-    Encrypt_Proc -->|sends ciphertext plus iv| VaultTable
+
+    VaultKeyGen -->|generated once, at setup Master Password| Wrap
+    MK --> Wrap
+    Wrap -->|stores| UserTable
+
     UserTable -->|fetch vaultSalt| PBKDF2
+    UserTable -->|fetch encryptedVaultKey| Unwrap
+    MK --> Unwrap
+    Unwrap -->|yields| VaultKeyGen
+
+    PlainData --> Encrypt_Proc
+    VaultKeyGen --> Encrypt_Proc
+    Encrypt_Proc -->|sends ciphertext plus iv| VaultTable
+
     VaultTable -->|fetch metadata| Dashboard["Dashboard List"]
     VaultTable -->|fetch ciphertext plus iv| Decrypt_Proc
-    EK --> Decrypt_Proc
+    VaultKeyGen --> Decrypt_Proc
     Decrypt_Proc -->|success or fail| PlainData
-    style EK fill:#ffcdd2,stroke:#b71c1c
+
+    style MK fill:#ffcdd2,stroke:#b71c1c
+    style VaultKeyGen fill:#ffe0b2,stroke:#e65100
     style VS_Gen fill:#c8e6c9,stroke:#1b5e20
     style Client fill:#f3e5f5,stroke:#4a148c
     style Server fill:#e1f5fe,stroke:#01579b
@@ -55,10 +72,12 @@ graph TD
 
 ### Alur singkat
 
-1. **Setup awal** — User register lewat Better Auth → set Master Password → `vaultSalt` random di-generate sekali → Master Password + `vaultSalt` di-derive lewat PBKDF2 jadi **Encryption Key (EK)**
-2. **Unlock vault** — Setiap kali buka app / refresh, user input Master Password lagi → `vaultSalt` diambil dari server → EK di-derive ulang (server tidak pernah menyimpan EK)
-3. **Simpan item** — Data sensitif (username, password, notes) digabung jadi JSON → dienkripsi pakai EK + AES-GCM → hanya `ciphertext` + `iv` yang dikirim & disimpan di server
-4. **Buka item** — `ciphertext` + `iv` diambil dari server → didekripsi di client pakai EK → jika Master Password salah, dekripsi otomatis gagal (authentication tag mismatch)
+1. **Register** — User register lewat Better Auth → `vaultSalt` random di-generate sekali → disimpan di `User` table. Vault belum siap dipakai di titik ini.
+2. **Setup Master Password** (step terpisah, setelah register) — User membuat Master Password → Master Password + `vaultSalt` di-derive lewat PBKDF2 jadi **`masterKey`** → `vaultKey` (kunci asli, random) di-generate sekali → `vaultKey` dienkripsi pakai `masterKey` → hasilnya (`encryptedVaultKey`) disimpan di `User` table.
+3. **Unlock vault** — Setiap kali buka app / refresh, user input Master Password lagi → `vaultSalt` + `encryptedVaultKey` diambil dari server → `masterKey` di-derive ulang → dipakai untuk membuka `encryptedVaultKey` → didapat `vaultKey` yang sama seperti sebelumnya (server tidak pernah menyimpan `vaultKey` maupun `masterKey` dalam bentuk plain)
+4. **Simpan item** — Data sensitif (username, password, notes) digabung jadi JSON → dienkripsi pakai `vaultKey` + AES-GCM → hanya `ciphertext` + `iv` yang dikirim & disimpan di server
+5. **Buka item** — `ciphertext` + `iv` diambil dari server → didekripsi di client pakai `vaultKey` → jika Master Password salah, `masterKey` yang di-derive juga salah, `encryptedVaultKey` gagal dibuka, dan dekripsi vault item otomatis gagal (authentication tag mismatch)
+6. **Ganti Master Password** — `masterKey` lama buka `encryptedVaultKey` → dapat `vaultKey` asli → `masterKey` baru (dari Master Password baru + `vaultSalt` yang sama) membungkus ulang `vaultKey` yang sama → `encryptedVaultKey` baru disimpan. **`vaultKey` tidak pernah berubah**, jadi seluruh `VaultItem` tidak perlu di-decrypt-encrypt ulang.
 
 ---
 
@@ -74,30 +93,40 @@ graph TD
 | Form                 | [TanStack Form](https://tanstack.com/form)            |
 | Validasi             | [Zod](https://zod.dev/)                               |
 | UI Components        | [shadcn/ui](https://ui.shadcn.com/) + Tailwind CSS v4 |
-| Email                | -                                                     |
+| Email                | Resend                                                |
 | Linting / Formatting | ESLint, Prettier, Husky (pre-commit/pre-push hooks)   |
 
 ---
 
 ## 🔬 Detail Kriptografi
 
-### Key Derivation — PBKDF2-SHA256
+### 1. Key Derivation — PBKDF2-SHA256 (menghasilkan `masterKey`)
 
 ```
 Master Password + vaultSalt
         ↓  (600.000 iterasi HMAC-SHA256)
-   Encryption Key (256-bit, non-extractable)
+       masterKey (256-bit, non-extractable)
 ```
 
-| Parameter              | Nilai             | Alasan                                                                          |
-| ---------------------- | ----------------- | ------------------------------------------------------------------------------- |
-| Iterasi                | 600.000           | Rekomendasi minimum OWASP untuk PBKDF2-SHA256 (2024+)                           |
-| Hash function          | SHA-256           | Aman, native di Web Crypto API                                                  |
-| Panjang Encryption Key | 256-bit           | AES-256, standar industri password manager                                      |
-| Panjang `vaultSalt`    | 16 byte (128-bit) | Mencegah dua Master Password identik menghasilkan key sama                      |
-| `extractable`          | `false`           | Key tidak bisa di-_export_ lagi setelah dibuat — mitigasi tambahan terhadap XSS |
+| Parameter           | Nilai             | Alasan                                                                                          |
+| ------------------- | ----------------- | ----------------------------------------------------------------------------------------------- |
+| Iterasi             | 600.000           | Rekomendasi minimum OWASP untuk PBKDF2-SHA256 (2024+)                                           |
+| Hash function       | SHA-256           | Aman, native di Web Crypto API                                                                  |
+| Panjang `masterKey` | 256-bit           | Dipakai sebagai wrapping key untuk `vaultKey`, bukan untuk enkripsi vault item langsung         |
+| Panjang `vaultSalt` | 16 byte (128-bit) | Dibuat sekali saat register; mencegah dua Master Password identik menghasilkan `masterKey` sama |
+| `extractable`       | `false`           | Key tidak bisa di-_export_ lagi setelah dibuat — mitigasi tambahan terhadap XSS                 |
 
-### Enkripsi/Dekripsi — AES-256-GCM
+### 2. Envelope Encryption — `vaultKey` dibungkus oleh `masterKey`
+
+```
+vaultKey (256-bit random, dibuat sekali saat setup Master Password)
+        ↓  (encrypt / wrap pakai masterKey, AES-GCM)
+   encryptedVaultKey  ← disimpan permanen di database
+```
+
+`vaultKey` inilah yang benar-benar mengenkripsi/mendekripsi tiap `VaultItem`. `vaultKey` **tidak pernah berubah** seumur akun — sehingga ganti Master Password cukup membungkus ulang `vaultKey` yang sama dengan `masterKey` baru, tanpa menyentuh isi vault.
+
+### 3. Enkripsi/Dekripsi Vault Item — AES-256-GCM (pakai `vaultKey`)
 
 | Parameter          | Nilai            | Alasan                                                                          |
 | ------------------ | ---------------- | ------------------------------------------------------------------------------- |
@@ -121,22 +150,23 @@ enum VaultItemType {
 
 model User {
   // ...field Better Auth lainnya
-  vaultSalt  String
-  vaultItems VaultItem[]
+  vaultSalt         String
+  encryptedVaultKey String?     // null sampai user setup Master Password
+  vaultItems        VaultItem[]
 }
 
 model VaultItem {
-  id         String  @id @default(cuid())
+  id       String @id @default(cuid())
   userId   String
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-   // --- Metadata (plaintext) ---
-  type     VaultItemType @default(ACCOUNT)
-  title    String
-  url      String?
+  // --- Metadata (plaintext) ---
+  type   VaultItemType @default(ACCOUNT)
+  title  String
+  url    String?
   pinned Boolean       @default(false)
 
-  // --- Encrypted payload ---
+  // --- Encrypted payload (dienkripsi pakai vaultKey) ---
   ciphertext String // base64: JSON berisi username, password, notes, dll
   iv         String // base64: IV unik, generate baru tiap encrypt
   encVersion Int    @default(1) // buat future-proofing algoritma enkripsi
@@ -149,62 +179,47 @@ model VaultItem {
 }
 ```
 
-Isi data dalam Encrypted payload
+**Catatan desain:** `title`, `url` dan sebagainya disimpan plain agar bisa menampilkan daftar vault item tanpa perlu mendekripsi semuanya terlebih dahulu. Data sensitif (username, password, notes) digabung jadi satu JSON lalu dienkripsi sebagai satu `ciphertext` menggunakan `vaultKey`.
+
+---
+
+## 🔧 Contoh Implementasi Kunci (Ringkas)
 
 ```ts
-export type CredentialType = 'PASSWORD' | 'PIN';
-export type VaultItemType = 'ACCOUNT' | 'NOTE';
+// --- Register: cuma bikin vaultSalt ---
+const vaultSalt = crypto.randomUUID();
+// simpan vaultSalt ke User
 
-// Credential History
-export interface CredentialHistoryEntry {
-  type: CredentialType;
-  value: string;
-  changedAt: string;
+// --- Setup Master Password (step terpisah setelah register) ---
+async function setupMasterPassword(masterPassword: string, vaultSalt: string) {
+  const masterKey = await deriveKey(masterPassword, vaultSalt); // PBKDF2
+  const vaultKey = crypto.getRandomValues(new Uint8Array(32)); // kunci asli, random
+  const encryptedVaultKey = await wrapKey(vaultKey, masterKey); // AES-GCM
+  // simpan encryptedVaultKey ke User
 }
 
-// Type ACCOUNT
-export interface AccountData {
-  email?: string;
-  username?: string;
-  phone?: string;
-  password?: string;
-  pin?: string;
-  notes?: string;
-
-  credentialHistory?: CredentialHistoryEntry[];
-}
-// Type khusus form tanpa `dredentialHistory`
-export type AccountFormData = Omit<AccountData, 'credentialHistory'>;
-
-// Type NOTE
-export interface NoteData {
-  content: string;
+// --- Unlock vault saat login ---
+async function unlockVault(masterPassword: string, vaultSalt: string, encryptedVaultKey: string) {
+  const masterKey = await deriveKey(masterPassword, vaultSalt);
+  const vaultKey = await unwrapKey(encryptedVaultKey, masterKey);
+  return vaultKey; // dipakai buat encrypt/decrypt VaultItem selama sesi berjalan
 }
 
-export type VaultItemPlaintext =
-  | { type: 'ACCOUNT'; data: AccountData }
-  | { type: 'NOTE'; data: NoteData };
+// --- Ganti Master Password ---
+async function changeMasterPassword(
+  oldPassword: string,
+  newPassword: string,
+  vaultSalt: string,
+  encryptedVaultKey: string,
+) {
+  const oldMasterKey = await deriveKey(oldPassword, vaultSalt);
+  const vaultKey = await unwrapKey(encryptedVaultKey, oldMasterKey);
 
-// Plaintext khusus form
-export type VaultItemFormPlaintext =
-  | { type: 'ACCOUNT'; data: AccountFormData }
-  | { type: 'NOTE'; data: NoteData };
-
-// Metadata Vault
-export interface VaultItemMetadata {
-  title: string;
-  url?: string;
-  pinned: boolean;
+  const newMasterKey = await deriveKey(newPassword, vaultSalt); // vaultSalt tetap sama
+  const newEncryptedVaultKey = await wrapKey(vaultKey, newMasterKey);
+  // update encryptedVaultKey di database
 }
-
-// type gabungan metadata + vault
-export type VaultItem = VaultItemMetadata & { id: string } & VaultItemPlaintext;
-
-// type gabungan metadata + vault tanpa `credentialHistoty`
-export type VaultItemFormValues = VaultItemMetadata & VaultItemFormPlaintext;
 ```
-
-**Catatan desain:** `title` dan `url` disimpan plain agar dashboard bisa menampilkan daftar vault item tanpa perlu mendekripsi semuanya terlebih dahulu. Data sensitif (username, password, notes) digabung jadi satu JSON lalu dienkripsi sebagai satu `ciphertext`.
 
 ---
 
@@ -232,7 +247,8 @@ Buka [http://localhost:3000](http://localhost:3000) di browser.
 
 ## ⚠️ Catatan Keamanan
 
-- **Master Password tidak bisa direset** jika lupa. Karena server tidak pernah menyimpannya (bahkan dalam bentuk hash), tidak ada mekanisme "forgot password" untuk Master Password — ini adalah konsekuensi yang melekat pada desain zero-knowledge, bukan kekurangan fitur.
+- **Master Password tidak bisa direset** jika lupa. Karena server tidak pernah menyimpan `masterKey` atau `vaultKey` dalam bentuk yang bisa dibuka tanpa Master Password, tidak ada mekanisme "forgot password" untuk Master Password — ini adalah konsekuensi yang melekat pada desain zero-knowledge, bukan kekurangan fitur.
+- **Ganti Master Password aman & ringan** — karena `vaultKey` dipisah dari `masterKey` (envelope encryption), mengganti Master Password hanya membungkus ulang `vaultKey` yang sama, tanpa perlu decrypt-encrypt ulang seluruh `VaultItem`.
 - Project ini dibuat untuk tujuan pembelajaran/portofolio. Untuk skenario produksi, pertimbangkan audit keamanan independen sebelum digunakan menyimpan data sensitif yang sesungguhnya.
 
 ---

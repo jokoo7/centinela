@@ -17,7 +17,7 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
       password: '',
     },
     validators: {
-      onSubmit: loginSchema,
+      onChange: loginSchema,
     },
     onSubmit: async ({ value }) => {
       await new Promise((resolve) => setTimeout(resolve, 3000));

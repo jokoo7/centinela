@@ -130,36 +130,41 @@ export default function VaultDetail({ open, onOpenChange, vault, ...props }: Vau
                     <Field>
                       <Label className="text-muted-foreground">Credential History</Label>
                       <div className="space-y-4">
-                        {vault.data.credentialHistory.map((entry, i) => (
-                          <div
-                            key={i}
-                            className="flex flex-col gap-1 rounded-[min(var(--radius-md),10px)] bg-muted/50 px-2.5 py-2 text-xs"
-                          >
-                            <div className="flex items-center justify-between gap-2">
-                              <span>{entry.type}</span>
-                              <span className="text-muted-foreground">
-                                {formatDate(entry.changedAt)}
-                              </span>
+                        {vault.data.credentialHistory
+                          .sort(
+                            (a, b) =>
+                              new Date(b.changedAt).getTime() - new Date(a.changedAt).getTime(),
+                          )
+                          .map((entry, i) => (
+                            <div
+                              key={i}
+                              className="flex flex-col gap-1 rounded-[min(var(--radius-md),10px)] bg-muted/50 px-2.5 py-2 text-xs"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span>{entry.type}</span>
+                                <span className="text-muted-foreground">
+                                  {formatDate(entry.changedAt)}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm text-accent-foreground">
+                                  {showPassword ? entry.value : '********'}
+                                </span>
+                                <Button
+                                  size="icon-xs"
+                                  variant="outline"
+                                  onClick={() => handleCopy(entry.value, `history-${i}`)}
+                                  disabled={copiedField === `history-${i}`}
+                                >
+                                  {copiedField === `history-${i}` ? (
+                                    <CircleCheckBig className="text-green-800" />
+                                  ) : (
+                                    <Copy />
+                                  )}
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-accent-foreground">
-                                {showPassword ? entry.value : '********'}
-                              </span>
-                              <Button
-                                size="icon-xs"
-                                variant="outline"
-                                onClick={() => handleCopy(entry.value, `history-${i}`)}
-                                disabled={copiedField === `history-${i}`}
-                              >
-                                {copiedField === `history-${i}` ? (
-                                  <CircleCheckBig className="text-green-800" />
-                                ) : (
-                                  <Copy />
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
                       </div>
                     </Field>
                   )}

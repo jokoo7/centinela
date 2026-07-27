@@ -19,7 +19,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
       password: '',
     },
     validators: {
-      onSubmit: registerSchema,
+      onChange: registerSchema,
     },
     onSubmit: async ({ value }) => {
       await new Promise((resolve) => setTimeout(resolve, 3000));

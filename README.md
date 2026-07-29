@@ -152,6 +152,7 @@ model User {
   // ...field Better Auth lainnya
   vaultSalt         String
   encryptedVaultKey String?     // null sampai user setup Master Password
+  encryptedVaultKeyIv String?
   vaultItems        VaultItem[]
 }
 

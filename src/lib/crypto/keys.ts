@@ -1,4 +1,4 @@
-import { base64ToBuffer, bufferToBase64 } from './encoding';
+import { base64ToBuffer, bufferToBase64, generateIvBytes } from './encoding';
 
 const PBKDF2_ITERATIONS = 600_000; // Rekomendasi OWASP 2023+ untuk PBKDF2-SHA256
 const AES_KEY_LENGTH = 256;
@@ -54,7 +54,7 @@ export async function wrapVaultKey(
   masterKey: CryptoKey,
 ): Promise<{ wrappedKey: string; iv: string }> {
   // Buat IV acak
-  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iv = generateIvBytes();
 
   // Enkripsi vaultKey
   const wrapped = await crypto.subtle.wrapKey('raw', vaultKey, masterKey, {

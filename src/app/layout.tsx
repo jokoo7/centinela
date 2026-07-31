@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Architects_Daughter } from 'next/font/google';
 import './globals.css';
+import { Toaster } from '@/components/ui/sonner';
 
 const fontSans = Architects_Daughter({
   subsets: ['latin'],
@@ -20,7 +21,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={` ${fontSans.variable} antialiased`}>{children}</body>
+      <body className={` ${fontSans.variable} antialiased`}>
+        {children}
+        <Toaster
+          toastOptions={{
+            classNames: {
+              toast: 'font-sans',
+            },
+          }}
+        />
+      </body>
     </html>
   );
 }

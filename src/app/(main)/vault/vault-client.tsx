@@ -2,21 +2,36 @@
 
 import { Button } from '@/components/ui/button';
 import VaultForm from './vault-form';
-import { FileText, Pin, Search, UserRound, UserRoundKey } from 'lucide-react';
+import { FileText, Pin, Search, UserRound, UserRoundKey, Vault } from 'lucide-react';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { VaultItem, VaultItemType } from '@/types/vault-type';
 import { useMemo, useOptimistic, useState, useTransition } from 'react';
 import VaultCard from './vault-card';
 import VaultDetail from './vault-detail';
+import { useVaultKey } from '@/hooks/use-vault-key';
+
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import { useRouter } from 'next/navigation';
+import UnlockVault from './unlock-vault';
 
 type FilterType = VaultItemType | 'ALL';
 
 export default function VaultClient({ initialVaults }: { initialVaults: VaultItem[] }) {
+  const { isUnlocked } = useVaultKey();
+
   const [detailOpen, setDetailOpen] = useState(false);
   const [filter, setFilter] = useState<FilterType>('ALL');
   const [search, setSearch] = useState('');
   const [selectedVault, setSelectedVault] = useState<VaultItem | null>(null);
   const [, startTransition] = useTransition();
+  const router = useRouter();
 
   const [optimisticItems, setOptimisticPin] = useOptimistic(
     initialVaults,
@@ -66,6 +81,29 @@ export default function VaultClient({ initialVaults }: { initialVaults: VaultIte
     ACCOUNT: UserRound,
     NOTE: FileText,
   };
+
+  if (!isUnlocked) {
+    return (
+      <Empty>
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Vault />
+          </EmptyMedia>
+          <EmptyTitle>Vault Locked</EmptyTitle>
+          <EmptyDescription>
+            Unlock your vault to securely access your saved passwords, notes, and other sensitive
+            information.
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent className="flex-row justify-center gap-2">
+          <UnlockVault />
+          <Button variant="outline" onClick={() => router.push('/setup-vault')}>
+            Create master password
+          </Button>
+        </EmptyContent>
+      </Empty>
+    );
+  }
 
   return (
     <>

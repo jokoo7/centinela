@@ -12,7 +12,7 @@ import MasterPasswordForm from './master-password-form';
 export default function AccountClient() {
   return (
     <Tabs defaultValue="profile">
-      <TabsList variant="line">
+      <TabsList>
         <TabsTrigger value="profile">Profile</TabsTrigger>
         <TabsTrigger value="security">Security</TabsTrigger>
       </TabsList>

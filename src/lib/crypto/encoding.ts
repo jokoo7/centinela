@@ -31,7 +31,7 @@ export function base64ToBuffer(base64: string): ArrayBuffer {
 }
 
 // Membuat byte acak dengan panjang tertentu
-export function generateRandomBytes(length: number): Uint8Array {
+export function generateRandomBytes(length: number): Uint8Array<ArrayBuffer> {
   return crypto.getRandomValues(new Uint8Array(length));
 }
 
@@ -40,7 +40,12 @@ export function generateSalt(): string {
   return bufferToBase64(generateRandomBytes(16));
 }
 
+// Generate IV 12 bytes
+export function generateIvBytes(): Uint8Array<ArrayBuffer> {
+  return generateRandomBytes(12);
+}
+
 // Membuat IV acak sepanjang 12 byte lalu diubah ke Base64
 export function generateIv(): string {
-  return bufferToBase64(generateRandomBytes(12));
+  return bufferToBase64(generateIvBytes());
 }

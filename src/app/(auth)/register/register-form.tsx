@@ -9,6 +9,7 @@ import { registerSchema } from '@/validation/auth-schema';
 import { useForm } from '@tanstack/react-form';
 import Link from 'next/link';
 import React from 'react';
+import { toast } from 'sonner';
 
 export default function RegisterForm({ className, ...props }: React.ComponentProps<'form'>) {
   const form = useForm({
@@ -23,7 +24,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
     },
     onSubmit: async ({ value }) => {
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      console.log(value);
+      toast(JSON.stringify(value));
     },
   });
 

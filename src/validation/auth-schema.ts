@@ -6,8 +6,8 @@ export const usernameSchema = z
   .min(1, 'Username tidak boleh kosong')
   .max(12, { message: 'Username maksimal 12 karakter' })
   .regex(/^\S+$/, { message: 'Username tidak boleh mengandung spasi' })
-  .regex(/^[a-zA-Z0-9_]+$/, {
-    message: 'Username hanya boleh berisi huruf, angka, dan underscore (_)',
+  .regex(/^[a-z0-9_]+$/, {
+    message: 'Username hanya boleh berisi huruf kecil, angka, dan underscore (_)',
   });
 export const emailSchema = z.string().trim().pipe(z.email('Format email tidak valid'));
 export const nameSchema = z.string().trim().min(1, 'Nama tidak boleh kosong');

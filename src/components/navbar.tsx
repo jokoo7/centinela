@@ -1,19 +1,15 @@
 import { cn } from '@/lib/utils';
 import WrapperContent from './wrapper-content';
-import { CircleUserRound, LogOutIcon, UserRoundKey, Vault } from 'lucide-react';
-import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import Link from 'next/link';
+import { UserRoundKey } from 'lucide-react';
+import { getServerSession } from '@/lib/get-session';
+import UserDropdown from './user-dropdown';
 
-export default function Navbar() {
+export default async function Navbar() {
+  const session = await getServerSession();
+  const user = session?.user;
+
+  if (!user) return null;
+
   return (
     <nav
       className={cn(
@@ -26,39 +22,7 @@ export default function Navbar() {
           <span className="text-lg font-light text-foreground">Centinela</span>
         </div>
 
-        <div className="flex items-center gap-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <Avatar>
-                  <AvatarImage src="https://github.com/shadcn.png" alt="shadcn" />
-                  <AvatarFallback>LR</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>@jokombur</DropdownMenuLabel>
-                <DropdownMenuItem asChild>
-                  <Link href="/account">
-                    <CircleUserRound />
-                    Account
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href="/vault">
-                    <Vault />
-                    Vault
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem variant="destructive">
-                  <LogOutIcon />
-                  Sign Out
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <UserDropdown user={user} />
       </WrapperContent>
     </nav>
   );

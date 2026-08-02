@@ -1,13 +1,20 @@
 import Navbar from '@/components/navbar';
 import WrapperContent from '@/components/wrapper-content';
 import { VaultKeyProvider } from '@/hooks/use-vault-key';
+import { getServerSession } from '@/lib/get-session';
+import { notFound } from 'next/navigation';
 import React from 'react';
 
-export default function layout({
+export default async function layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession();
+  const user = session?.user;
+
+  if (!user) notFound();
+
   return (
     <VaultKeyProvider>
       <main className="relative flex min-h-screen flex-col">

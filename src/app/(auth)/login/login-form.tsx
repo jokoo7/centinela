@@ -4,13 +4,19 @@ import { InputPassword } from '@/components/input-password';
 import LoadingButton from '@/components/loading-button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { authClient } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 import { loginSchema } from '@/validation/auth-schema';
 import { useForm } from '@tanstack/react-form';
 import Link from 'next/link';
-import React from 'react';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function LoginForm({ className, ...props }: React.ComponentProps<'form'>) {
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
   const form = useForm({
     defaultValues: {
       username: '',
@@ -20,8 +26,18 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
       onChange: loginSchema,
     },
     onSubmit: async ({ value }) => {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      console.log(value);
+      // await new Promise((resolve) => setTimeout(resolve, 3000));
+      const { error } = await authClient.signIn.username({
+        username: value.username,
+        password: value.password,
+      });
+
+      if (error) {
+        setError(error.message || 'Something went wrong');
+      } else {
+        toast('Login successfully');
+        router.push('/vault');
+      }
     },
   });
 
@@ -35,6 +51,8 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
       {...props}
     >
       <FieldGroup>
+        {error && <FieldError>{error}</FieldError>}
+
         <form.Field name="username">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;

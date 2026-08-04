@@ -6,6 +6,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/c
 import { Input } from '@/components/ui/input';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Spinner } from '@/components/ui/spinner';
+import { useUsernameAvailability } from '@/hooks/use-username-availability';
 import { authClient } from '@/lib/auth-client';
 import { cn } from '@/lib/utils';
 import { registerSchema } from '@/validation/auth-schema';
@@ -33,25 +34,8 @@ function slugifyUsername(name: string, maxLength = 12) {
 export default function RegisterForm({ className, ...props }: React.ComponentProps<'form'>) {
   const [error, setError] = useState<string | null>(null);
   const [usernameTouched, setUsernameTouched] = useState(false);
-  const [checking, setChecking] = useState(false);
-  const [available, setAvailable] = useState<boolean | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const { checking, available, checkError, checkUsername } = useUsernameAvailability();
   const router = useRouter();
-
-  const checkUsername = useCallback((value: string) => {
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    if (!value) {
-      setAvailable(null);
-      return;
-    }
-
-    debounceRef.current = setTimeout(async () => {
-      setChecking(true);
-      const res = await authClient.isUsernameAvailable({ username: value });
-      setAvailable(res.data?.available ?? null);
-      setChecking(false);
-    }, 400);
-  }, []);
 
   const form = useForm({
     defaultValues: {
@@ -91,12 +75,9 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
       className={cn('flex w-full flex-col gap-4', className)}
       {...props}
     >
-      {error && (
-        <div role="alert" className="text-sm text-red-600">
-          {error}
-        </div>
-      )}
       <FieldGroup>
+        {error && <FieldError>{error}</FieldError>}
+
         <form.Field name="name">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -164,6 +145,9 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
                   <FieldDescription className="text-destructive">
                     Username is already taken
                   </FieldDescription>
+                )}
+                {checkError && (
+                  <FieldDescription className="text-destructive">{checkError}</FieldDescription>
                 )}
               </Field>
             );

@@ -14,7 +14,7 @@ import { useForm } from '@tanstack/react-form';
 import { Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useRef, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 function slugifyUsername(name: string, maxLength = 12) {

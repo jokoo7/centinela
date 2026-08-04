@@ -3,6 +3,7 @@ import { prismaAdapter } from 'better-auth/adapters/prisma';
 import prisma from '@/lib/prisma';
 import { username } from 'better-auth/plugins';
 import { generateSalt } from './crypto/encoding';
+import { nextCookies } from 'better-auth/next-js';
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -53,6 +54,7 @@ export const auth = betterAuth({
       maxUsernameLength: 12,
       usernameValidator: (username) => /^[a-z0-9_]+$/.test(username),
     }),
+    nextCookies(),
   ],
 });
 

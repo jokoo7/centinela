@@ -2,7 +2,7 @@ import Navbar from '@/components/navbar';
 import WrapperContent from '@/components/wrapper-content';
 import { VaultKeyProvider } from '@/hooks/use-vault-key';
 import { getServerSession } from '@/lib/get-session';
-import { notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import React from 'react';
 
 export default async function layout({
@@ -13,7 +13,7 @@ export default async function layout({
   const session = await getServerSession();
   const user = session?.user;
 
-  if (!user) notFound();
+  if (!user) redirect('/login');
 
   return (
     <VaultKeyProvider>

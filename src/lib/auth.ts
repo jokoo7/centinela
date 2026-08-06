@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma';
 import { username } from 'better-auth/plugins';
 import { generateSalt } from './crypto/encoding';
 import { nextCookies } from 'better-auth/next-js';
+import { sendEmail } from './email';
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -11,8 +12,19 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
-    autoSignIn: true,
+    resetPasswordTokenExpiresIn: 900, // 15 menit
+    revokeSessionsOnPasswordReset: true, // logout semua device lain setelah reset berhasil
+    sendResetPassword: async ({ user, url }) => {
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: 'Reset your password',
+          text: `Click the link to reset your password: ${url}`,
+        });
+      } catch (err) {
+        console.error('Failed to send reset password email:', err);
+      }
+    },
   },
   user: {
     additionalFields: {
@@ -37,7 +49,6 @@ export const auth = betterAuth({
     user: {
       create: {
         before: async (user) => {
-          console.log('HOOK JALAN, vaultSalt:', generateSalt());
           return {
             data: {
               ...user,

@@ -27,17 +27,22 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
     },
     onSubmit: async ({ value }) => {
       // await new Promise((resolve) => setTimeout(resolve, 3000));
-      const { error } = await authClient.signIn.username({
-        username: value.username,
-        password: value.password,
-      });
-
-      if (error) {
-        setError(error.message || 'Something went wrong');
-      } else {
-        toast('Login successfully');
-        router.push('/vault');
-      }
+      await authClient.signIn.username(
+        {
+          username: value.username,
+          password: value.password,
+          rememberMe: false,
+        },
+        {
+          onSuccess: () => {
+            toast('Login successfully');
+            router.push('/vault');
+          },
+          onError: (ctx) => {
+            setError(ctx.error.message || 'Something went wrong');
+          },
+        },
+      );
     },
   });
 
@@ -81,6 +86,12 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
               <Field data-invalid={isInvalid} className="text-start">
                 <div className="flex items-center">
                   <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                  <Link
+                    href="/forgot-password"
+                    className="ml-auto inline-block text-xs text-accent-foreground underline"
+                  >
+                    Forgot your password?
+                  </Link>
                 </div>
                 <InputPassword
                   id={field.name}

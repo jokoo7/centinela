@@ -53,6 +53,10 @@ export const updateProfileDetailSchema = z.object({
   username: usernameSchema,
 });
 
-export const updateEmailSchema = z.object({
+export const withEmailSchema = z.object({
   email: emailSchema,
+});
+
+export const withPasswordSchema = z.object({
+  password: passwordSchema,
 });

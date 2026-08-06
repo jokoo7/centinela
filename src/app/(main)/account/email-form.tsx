@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { BadgeCheck, BadgeX } from 'lucide-react';
 import { useForm } from '@tanstack/react-form';
-import { updateEmailSchema } from '@/validation/auth-schema';
 import LoadingButton from '@/components/loading-button';
+import { withEmailSchema } from '@/validation/auth-schema';
 
 export default function EmailForm() {
   const form = useForm({
@@ -13,7 +13,7 @@ export default function EmailForm() {
       email: '',
     },
     validators: {
-      onChange: updateEmailSchema,
+      onChange: withEmailSchema,
     },
     onSubmit: async ({ value }) => {
       await new Promise((resolve) => setTimeout(resolve, 3000));

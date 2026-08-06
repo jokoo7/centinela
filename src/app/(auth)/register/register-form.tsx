@@ -49,19 +49,23 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
     },
     onSubmit: async ({ value }) => {
       // await new Promise((resolve) => setTimeout(resolve, 3000));
-      const { error } = await authClient.signUp.email({
-        email: value.email,
-        name: value.name,
-        username: value.username,
-        password: value.password,
-      });
-
-      if (error) {
-        setError(error.message || 'Something went wrong');
-      } else {
-        toast('Register successfully');
-        router.push('/vault');
-      }
+      await authClient.signUp.email(
+        {
+          email: value.email,
+          name: value.name,
+          username: value.username,
+          password: value.password,
+        },
+        {
+          onSuccess: () => {
+            toast('Register successfully');
+            router.push('/vault');
+          },
+          onError: (ctx) => {
+            setError(ctx.error.message || 'Something went wrong');
+          },
+        },
+      );
     },
   });
 

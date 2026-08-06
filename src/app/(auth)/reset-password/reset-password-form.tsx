@@ -1,0 +1,93 @@
+'use client';
+
+import { InputPassword } from '@/components/input-password';
+import LoadingButton from '@/components/loading-button';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { authClient } from '@/lib/auth-client';
+import { withPasswordSchema } from '@/validation/auth-schema';
+import { useForm } from '@tanstack/react-form';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
+export default function ResetPasswordForm({ token }: { token: string }) {
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const form = useForm({
+    defaultValues: {
+      password: '',
+    },
+    validators: {
+      onChange: withPasswordSchema,
+    },
+    onSubmit: async ({ value }) => {
+      await authClient.resetPassword(
+        {
+          newPassword: value.password,
+          token,
+        },
+        {
+          onSuccess: () => {
+            setSuccess('Password has been reset. You can now sign in.');
+            setTimeout(() => router.push('/login'), 3000);
+            form.reset();
+          },
+          onError: (ctx) => {
+            const message =
+              ctx.error.code === 'INVALID_TOKEN'
+                ? 'Link reset password sudah kedaluwarsa. Silakan minta link baru.'
+                : ctx.error.message || 'Something went wrong';
+            setError(message);
+          },
+        },
+      );
+    },
+  });
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+      className="flex w-full flex-col gap-4"
+    >
+      <FieldGroup>
+        <form.Field name="password">
+          {(field) => {
+            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid} className="text-start">
+                <FieldLabel htmlFor={field.name}>New password</FieldLabel>
+                <InputPassword
+                  id={field.name}
+                  name={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  placeholder="Enter new password"
+                  autoComplete="new-password"
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Subscribe selector={(state) => [state.isSubmitting, state.canSubmit] as const}>
+          {([isSubmitting, canSubmit]) => (
+            <Field>
+              <LoadingButton loading={isSubmitting} disabled={!canSubmit} type="submit">
+                reset password
+              </LoadingButton>
+            </Field>
+          )}
+        </form.Subscribe>
+
+        {error && <FieldError>{error}</FieldError>}
+        {success && <p className="text-sm text-green-600">{success}</p>}
+      </FieldGroup>
+    </form>
+  );
+}

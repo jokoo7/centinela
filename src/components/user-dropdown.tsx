@@ -21,13 +21,17 @@ export default function UserDropdown({ user }: { user: User }) {
   const router = useRouter();
 
   async function handleLogout() {
-    const { error } = await authClient.signOut();
-    if (error) {
-      toast(error.message || 'Something went wrong');
-    } else {
-      toast('Signed out successfully');
-      router.push('/login');
-    }
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          toast('Signed out successfully');
+          router.push('/login');
+        },
+        onError: (ctx) => {
+          toast(ctx.error.message || 'Something went wrong');
+        },
+      },
+    });
   }
 
   return (

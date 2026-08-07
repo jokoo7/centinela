@@ -16,8 +16,10 @@ import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/auth';
+import { useVaultKey } from '@/hooks/use-vault-key';
 
 export default function UserDropdown({ user }: { user: User }) {
+  const { lock } = useVaultKey();
   const router = useRouter();
 
   async function handleLogout() {
@@ -25,6 +27,7 @@ export default function UserDropdown({ user }: { user: User }) {
       fetchOptions: {
         onSuccess: () => {
           toast('Signed out successfully');
+          lock();
           router.push('/login');
         },
         onError: (ctx) => {

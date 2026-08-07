@@ -3,14 +3,26 @@
 import { InputPassword } from '@/components/input-password';
 import LoadingButton from '@/components/loading-button';
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { User } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { setupMasterPasswordSchema } from '@/validation/auth-schema';
 import { useForm } from '@tanstack/react-form';
 import Link from 'next/link';
 import React, { useState } from 'react';
+import { saveEncryptedVaultKey } from './action';
+import { useVaultKey } from '@/hooks/use-vault-key';
+import { useRouter } from 'next/navigation';
+import { setupMasterPassword } from '@/lib/crypto/setup';
 
-export default function SetupVaultForm({ className, ...props }: React.ComponentProps<'form'>) {
+interface SetupVaultFormProps extends React.ComponentProps<'form'> {
+  user: User;
+}
+
+export default function SetupVaultForm({ user, className, ...props }: SetupVaultFormProps) {
+  const { setUnlockedKey } = useVaultKey();
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const calculateStrenth = (pwd: string) => {
     let strength = 0;
@@ -31,8 +43,31 @@ export default function SetupVaultForm({ className, ...props }: React.ComponentP
       onSubmit: setupMasterPasswordSchema,
     },
     onSubmit: async ({ value }) => {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log(value);
+      // await new Promise((resolve) => setTimeout(resolve, 2000));
+      setError(null);
+
+      try {
+        const { vaultKey, encryptedVaultKey, encryptedVaultKeyIv } = await setupMasterPassword(
+          value.masterPassword,
+          user.vaultSalt!,
+        );
+
+        const { error } = await saveEncryptedVaultKey(
+          user.id,
+          encryptedVaultKey,
+          encryptedVaultKeyIv,
+        );
+
+        if (!error) {
+          setUnlockedKey(vaultKey!);
+          setError(null);
+          router.push('/vault');
+        } else {
+          setError('Gagal Setup Master Password');
+        }
+      } catch {
+        setError('Gagal Setup Master Password');
+      }
     },
   });
 
@@ -56,6 +91,8 @@ export default function SetupVaultForm({ className, ...props }: React.ComponentP
       {...props}
     >
       <FieldGroup>
+        {error && <FieldError>{error}</FieldError>}
+
         <form.Field name="masterPassword">
           {(field) => {
             const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;

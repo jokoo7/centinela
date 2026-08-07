@@ -35,6 +35,7 @@ export type UserMinAggregateOutputType = {
   displayUsername: string | null;
   vaultSalt: string | null;
   encryptedVaultKey: string | null;
+  encryptedVaultKeyIv: string | null;
 };
 
 export type UserMaxAggregateOutputType = {
@@ -49,6 +50,7 @@ export type UserMaxAggregateOutputType = {
   displayUsername: string | null;
   vaultSalt: string | null;
   encryptedVaultKey: string | null;
+  encryptedVaultKeyIv: string | null;
 };
 
 export type UserCountAggregateOutputType = {
@@ -63,6 +65,7 @@ export type UserCountAggregateOutputType = {
   displayUsername: number;
   vaultSalt: number;
   encryptedVaultKey: number;
+  encryptedVaultKeyIv: number;
   _all: number;
 };
 
@@ -78,6 +81,7 @@ export type UserMinAggregateInputType = {
   displayUsername?: true;
   vaultSalt?: true;
   encryptedVaultKey?: true;
+  encryptedVaultKeyIv?: true;
 };
 
 export type UserMaxAggregateInputType = {
@@ -92,6 +96,7 @@ export type UserMaxAggregateInputType = {
   displayUsername?: true;
   vaultSalt?: true;
   encryptedVaultKey?: true;
+  encryptedVaultKeyIv?: true;
 };
 
 export type UserCountAggregateInputType = {
@@ -106,6 +111,7 @@ export type UserCountAggregateInputType = {
   displayUsername?: true;
   vaultSalt?: true;
   encryptedVaultKey?: true;
+  encryptedVaultKeyIv?: true;
   _all?: true;
 };
 
@@ -194,6 +200,7 @@ export type UserGroupByOutputType = {
   displayUsername: string | null;
   vaultSalt: string;
   encryptedVaultKey: string | null;
+  encryptedVaultKeyIv: string | null;
   _count: UserCountAggregateOutputType | null;
   _min: UserMinAggregateOutputType | null;
   _max: UserMaxAggregateOutputType | null;
@@ -226,6 +233,7 @@ export type UserWhereInput = {
   displayUsername?: Prisma.StringNullableFilter<'User'> | string | null;
   vaultSalt?: Prisma.StringFilter<'User'> | string;
   encryptedVaultKey?: Prisma.StringNullableFilter<'User'> | string | null;
+  encryptedVaultKeyIv?: Prisma.StringNullableFilter<'User'> | string | null;
   vaultItems?: Prisma.VaultItemListRelationFilter;
   sessions?: Prisma.SessionListRelationFilter;
   accounts?: Prisma.AccountListRelationFilter;
@@ -243,6 +251,7 @@ export type UserOrderByWithRelationInput = {
   displayUsername?: Prisma.SortOrderInput | Prisma.SortOrder;
   vaultSalt?: Prisma.SortOrder;
   encryptedVaultKey?: Prisma.SortOrderInput | Prisma.SortOrder;
+  encryptedVaultKeyIv?: Prisma.SortOrderInput | Prisma.SortOrder;
   vaultItems?: Prisma.VaultItemOrderByRelationAggregateInput;
   sessions?: Prisma.SessionOrderByRelationAggregateInput;
   accounts?: Prisma.AccountOrderByRelationAggregateInput;
@@ -264,6 +273,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<
     displayUsername?: Prisma.StringNullableFilter<'User'> | string | null;
     vaultSalt?: Prisma.StringFilter<'User'> | string;
     encryptedVaultKey?: Prisma.StringNullableFilter<'User'> | string | null;
+    encryptedVaultKeyIv?: Prisma.StringNullableFilter<'User'> | string | null;
     vaultItems?: Prisma.VaultItemListRelationFilter;
     sessions?: Prisma.SessionListRelationFilter;
     accounts?: Prisma.AccountListRelationFilter;
@@ -283,6 +293,7 @@ export type UserOrderByWithAggregationInput = {
   displayUsername?: Prisma.SortOrderInput | Prisma.SortOrder;
   vaultSalt?: Prisma.SortOrder;
   encryptedVaultKey?: Prisma.SortOrderInput | Prisma.SortOrder;
+  encryptedVaultKeyIv?: Prisma.SortOrderInput | Prisma.SortOrder;
   _count?: Prisma.UserCountOrderByAggregateInput;
   _max?: Prisma.UserMaxOrderByAggregateInput;
   _min?: Prisma.UserMinOrderByAggregateInput;
@@ -303,6 +314,7 @@ export type UserScalarWhereWithAggregatesInput = {
   displayUsername?: Prisma.StringNullableWithAggregatesFilter<'User'> | string | null;
   vaultSalt?: Prisma.StringWithAggregatesFilter<'User'> | string;
   encryptedVaultKey?: Prisma.StringNullableWithAggregatesFilter<'User'> | string | null;
+  encryptedVaultKeyIv?: Prisma.StringNullableWithAggregatesFilter<'User'> | string | null;
 };
 
 export type UserCreateInput = {
@@ -317,6 +329,7 @@ export type UserCreateInput = {
   displayUsername?: string | null;
   vaultSalt: string;
   encryptedVaultKey?: string | null;
+  encryptedVaultKeyIv?: string | null;
   vaultItems?: Prisma.VaultItemCreateNestedManyWithoutUserInput;
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput;
@@ -334,6 +347,7 @@ export type UserUncheckedCreateInput = {
   displayUsername?: string | null;
   vaultSalt: string;
   encryptedVaultKey?: string | null;
+  encryptedVaultKeyIv?: string | null;
   vaultItems?: Prisma.VaultItemUncheckedCreateNestedManyWithoutUserInput;
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput;
@@ -351,6 +365,7 @@ export type UserUpdateInput = {
   displayUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultSalt?: Prisma.StringFieldUpdateOperationsInput | string;
   encryptedVaultKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  encryptedVaultKeyIv?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultItems?: Prisma.VaultItemUpdateManyWithoutUserNestedInput;
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput;
@@ -368,6 +383,7 @@ export type UserUncheckedUpdateInput = {
   displayUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultSalt?: Prisma.StringFieldUpdateOperationsInput | string;
   encryptedVaultKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  encryptedVaultKeyIv?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultItems?: Prisma.VaultItemUncheckedUpdateManyWithoutUserNestedInput;
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput;
@@ -385,6 +401,7 @@ export type UserCreateManyInput = {
   displayUsername?: string | null;
   vaultSalt: string;
   encryptedVaultKey?: string | null;
+  encryptedVaultKeyIv?: string | null;
 };
 
 export type UserUpdateManyMutationInput = {
@@ -399,6 +416,7 @@ export type UserUpdateManyMutationInput = {
   displayUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultSalt?: Prisma.StringFieldUpdateOperationsInput | string;
   encryptedVaultKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  encryptedVaultKeyIv?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 
 export type UserUncheckedUpdateManyInput = {
@@ -413,6 +431,7 @@ export type UserUncheckedUpdateManyInput = {
   displayUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultSalt?: Prisma.StringFieldUpdateOperationsInput | string;
   encryptedVaultKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  encryptedVaultKeyIv?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 
 export type UserCountOrderByAggregateInput = {
@@ -427,6 +446,7 @@ export type UserCountOrderByAggregateInput = {
   displayUsername?: Prisma.SortOrder;
   vaultSalt?: Prisma.SortOrder;
   encryptedVaultKey?: Prisma.SortOrder;
+  encryptedVaultKeyIv?: Prisma.SortOrder;
 };
 
 export type UserMaxOrderByAggregateInput = {
@@ -441,6 +461,7 @@ export type UserMaxOrderByAggregateInput = {
   displayUsername?: Prisma.SortOrder;
   vaultSalt?: Prisma.SortOrder;
   encryptedVaultKey?: Prisma.SortOrder;
+  encryptedVaultKeyIv?: Prisma.SortOrder;
 };
 
 export type UserMinOrderByAggregateInput = {
@@ -455,6 +476,7 @@ export type UserMinOrderByAggregateInput = {
   displayUsername?: Prisma.SortOrder;
   vaultSalt?: Prisma.SortOrder;
   encryptedVaultKey?: Prisma.SortOrder;
+  encryptedVaultKeyIv?: Prisma.SortOrder;
 };
 
 export type UserScalarRelationFilter = {
@@ -568,6 +590,7 @@ export type UserCreateWithoutVaultItemsInput = {
   displayUsername?: string | null;
   vaultSalt: string;
   encryptedVaultKey?: string | null;
+  encryptedVaultKeyIv?: string | null;
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput;
 };
@@ -584,6 +607,7 @@ export type UserUncheckedCreateWithoutVaultItemsInput = {
   displayUsername?: string | null;
   vaultSalt: string;
   encryptedVaultKey?: string | null;
+  encryptedVaultKeyIv?: string | null;
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput;
 };
@@ -628,6 +652,7 @@ export type UserUpdateWithoutVaultItemsInput = {
   displayUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultSalt?: Prisma.StringFieldUpdateOperationsInput | string;
   encryptedVaultKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  encryptedVaultKeyIv?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput;
 };
@@ -644,6 +669,7 @@ export type UserUncheckedUpdateWithoutVaultItemsInput = {
   displayUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultSalt?: Prisma.StringFieldUpdateOperationsInput | string;
   encryptedVaultKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  encryptedVaultKeyIv?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput;
 };
@@ -660,6 +686,7 @@ export type UserCreateWithoutSessionsInput = {
   displayUsername?: string | null;
   vaultSalt: string;
   encryptedVaultKey?: string | null;
+  encryptedVaultKeyIv?: string | null;
   vaultItems?: Prisma.VaultItemCreateNestedManyWithoutUserInput;
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput;
 };
@@ -676,6 +703,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   displayUsername?: string | null;
   vaultSalt: string;
   encryptedVaultKey?: string | null;
+  encryptedVaultKeyIv?: string | null;
   vaultItems?: Prisma.VaultItemUncheckedCreateNestedManyWithoutUserInput;
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput;
 };
@@ -720,6 +748,7 @@ export type UserUpdateWithoutSessionsInput = {
   displayUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultSalt?: Prisma.StringFieldUpdateOperationsInput | string;
   encryptedVaultKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  encryptedVaultKeyIv?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultItems?: Prisma.VaultItemUpdateManyWithoutUserNestedInput;
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput;
 };
@@ -736,6 +765,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   displayUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultSalt?: Prisma.StringFieldUpdateOperationsInput | string;
   encryptedVaultKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  encryptedVaultKeyIv?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultItems?: Prisma.VaultItemUncheckedUpdateManyWithoutUserNestedInput;
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput;
 };
@@ -752,6 +782,7 @@ export type UserCreateWithoutAccountsInput = {
   displayUsername?: string | null;
   vaultSalt: string;
   encryptedVaultKey?: string | null;
+  encryptedVaultKeyIv?: string | null;
   vaultItems?: Prisma.VaultItemCreateNestedManyWithoutUserInput;
   sessions?: Prisma.SessionCreateNestedManyWithoutUserInput;
 };
@@ -768,6 +799,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   displayUsername?: string | null;
   vaultSalt: string;
   encryptedVaultKey?: string | null;
+  encryptedVaultKeyIv?: string | null;
   vaultItems?: Prisma.VaultItemUncheckedCreateNestedManyWithoutUserInput;
   sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput;
 };
@@ -812,6 +844,7 @@ export type UserUpdateWithoutAccountsInput = {
   displayUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultSalt?: Prisma.StringFieldUpdateOperationsInput | string;
   encryptedVaultKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  encryptedVaultKeyIv?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultItems?: Prisma.VaultItemUpdateManyWithoutUserNestedInput;
   sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput;
 };
@@ -828,6 +861,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   displayUsername?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultSalt?: Prisma.StringFieldUpdateOperationsInput | string;
   encryptedVaultKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+  encryptedVaultKeyIv?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
   vaultItems?: Prisma.VaultItemUncheckedUpdateManyWithoutUserNestedInput;
   sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput;
 };
@@ -904,6 +938,7 @@ export type UserSelect<
     displayUsername?: boolean;
     vaultSalt?: boolean;
     encryptedVaultKey?: boolean;
+    encryptedVaultKeyIv?: boolean;
     vaultItems?: boolean | Prisma.User$vaultItemsArgs<ExtArgs>;
     sessions?: boolean | Prisma.User$sessionsArgs<ExtArgs>;
     accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>;
@@ -927,6 +962,7 @@ export type UserSelectCreateManyAndReturn<
     displayUsername?: boolean;
     vaultSalt?: boolean;
     encryptedVaultKey?: boolean;
+    encryptedVaultKeyIv?: boolean;
   },
   ExtArgs['result']['user']
 >;
@@ -946,6 +982,7 @@ export type UserSelectUpdateManyAndReturn<
     displayUsername?: boolean;
     vaultSalt?: boolean;
     encryptedVaultKey?: boolean;
+    encryptedVaultKeyIv?: boolean;
   },
   ExtArgs['result']['user']
 >;
@@ -962,6 +999,7 @@ export type UserSelectScalar = {
   displayUsername?: boolean;
   vaultSalt?: boolean;
   encryptedVaultKey?: boolean;
+  encryptedVaultKeyIv?: boolean;
 };
 
 export type UserOmit<
@@ -977,7 +1015,8 @@ export type UserOmit<
   | 'username'
   | 'displayUsername'
   | 'vaultSalt'
-  | 'encryptedVaultKey',
+  | 'encryptedVaultKey'
+  | 'encryptedVaultKeyIv',
   ExtArgs['result']['user']
 >;
 export type UserInclude<
@@ -1017,6 +1056,7 @@ export type $UserPayload<
       displayUsername: string | null;
       vaultSalt: string;
       encryptedVaultKey: string | null;
+      encryptedVaultKeyIv: string | null;
     },
     ExtArgs['result']['user']
   >;
@@ -1602,6 +1642,7 @@ export interface UserFieldRefs {
   readonly displayUsername: Prisma.FieldRef<'User', 'String'>;
   readonly vaultSalt: Prisma.FieldRef<'User', 'String'>;
   readonly encryptedVaultKey: Prisma.FieldRef<'User', 'String'>;
+  readonly encryptedVaultKeyIv: Prisma.FieldRef<'User', 'String'>;
 }
 
 // Custom InputTypes

@@ -5,16 +5,22 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { useVaultKey } from '@/hooks/use-vault-key';
+import { User } from '@/lib/auth';
 import { unlockVaultSchema } from '@/validation/auth-schema';
 import { useForm } from '@tanstack/react-form';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-export default function UnlockVault() {
+export default function UnlockVault({ user }: { user: User }) {
+  const [open, setDialogOpen] = useState(false);
+  const { unlock } = useVaultKey();
+
   const form = useForm({
     defaultValues: {
       masterPassword: '',
@@ -23,13 +29,24 @@ export default function UnlockVault() {
       onSubmit: unlockVaultSchema,
     },
     onSubmit: async ({ value }) => {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log(value);
+      try {
+        await unlock(
+          value.masterPassword,
+          user.vaultSalt!,
+          user.encryptedVaultKey!,
+          user.encryptedVaultKeyIv!,
+        );
+      } catch {
+        toast('Master password salah');
+      } finally {
+        setDialogOpen(false);
+        form.reset();
+      }
     },
   });
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setDialogOpen}>
       <form>
         <DialogTrigger asChild>
           <Button>Unlock vault</Button>

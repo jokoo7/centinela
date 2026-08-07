@@ -83,6 +83,7 @@ export const UserScalarFieldEnum = {
   displayUsername: 'displayUsername',
   vaultSalt: 'vaultSalt',
   encryptedVaultKey: 'encryptedVaultKey',
+  encryptedVaultKeyIv: 'encryptedVaultKeyIv',
 } as const;
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];

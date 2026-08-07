@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button';
 import VaultForm from './vault-form';
 import { FileText, Pin, Search, UserRound, UserRoundKey, Vault } from 'lucide-react';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
-import { VaultItem, VaultItemType } from '@/types/vault-type';
-import { useMemo, useOptimistic, useState, useTransition } from 'react';
+import { AccountData, NoteData, VaultItem as VaultAsType, VaultItemType } from '@/types/vault-type';
+import { useEffect, useMemo, useOptimistic, useState, useTransition } from 'react';
 import VaultCard from './vault-card';
 import VaultDetail from './vault-detail';
 import { useVaultKey } from '@/hooks/use-vault-key';
@@ -20,21 +20,57 @@ import {
 } from '@/components/ui/empty';
 import { useRouter } from 'next/navigation';
 import UnlockVault from './unlock-vault';
+import { VaultItem } from '@/lib/generated/prisma/client';
+import { decryptVaultItem } from '@/lib/crypto/encryption';
+import { User } from '@/lib/auth';
 
 type FilterType = VaultItemType | 'ALL';
 
-export default function VaultClient({ initialVaults }: { initialVaults: VaultItem[] }) {
-  const { isUnlocked } = useVaultKey();
+export default function VaultClient({
+  initialVaults,
+  session,
+}: {
+  initialVaults: VaultItem[];
+  session: User;
+}) {
+  const { isUnlocked, vaultKey } = useVaultKey();
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [filter, setFilter] = useState<FilterType>('ALL');
   const [search, setSearch] = useState('');
-  const [selectedVault, setSelectedVault] = useState<VaultItem | null>(null);
+  const [selectedVault, setSelectedVault] = useState<VaultAsType | null>(null);
+  const [decryptedItems, setDecryptedItems] = useState<VaultAsType[] | null>(null);
   const [, startTransition] = useTransition();
   const router = useRouter();
 
+  useEffect(() => {
+    if (!isUnlocked || !vaultKey) {
+      // avoid synchronous state update inside effect to prevent cascading renders
+      startTransition(() => setDecryptedItems(null));
+      return;
+    }
+
+    let cancelled = false;
+
+    Promise.all(
+      initialVaults.map(async (item) => {
+        const data: AccountData | NoteData = await decryptVaultItem(
+          { ciphertext: item.ciphertext, iv: item.iv },
+          vaultKey,
+        );
+        return { ...item, data } as unknown as VaultAsType;
+      }),
+    ).then((result) => {
+      if (!cancelled) setDecryptedItems(result);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isUnlocked, vaultKey, initialVaults]);
+
   const [optimisticItems, setOptimisticPin] = useOptimistic(
-    initialVaults,
+    decryptedItems ?? [],
     (state, { id, pinned }: { id: string; pinned: boolean }) =>
       state.map((item) => (item.id === id ? { ...item, pinned } : { ...item })),
   );
@@ -51,7 +87,7 @@ export default function VaultClient({ initialVaults }: { initialVaults: VaultIte
               item.data.username?.toLowerCase().includes(query));
           return inTitle || inSubTitle;
         })
-      : initialVaults;
+      : (decryptedItems ?? []);
 
     const filtered = filter === 'ALL' ? bySearch : bySearch.filter((item) => item.type === filter);
 
@@ -82,6 +118,8 @@ export default function VaultClient({ initialVaults }: { initialVaults: VaultIte
     NOTE: FileText,
   };
 
+  // console.log({ key: vaultKey, isUnlocked });
+
   if (!isUnlocked) {
     return (
       <Empty>
@@ -96,10 +134,12 @@ export default function VaultClient({ initialVaults }: { initialVaults: VaultIte
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent className="flex-row justify-center gap-2">
-          <UnlockVault />
-          <Button variant="outline" onClick={() => router.push('/setup-vault')}>
-            Create master password
-          </Button>
+          {session && <UnlockVault user={session} />}
+          {!session.encryptedVaultKey && !session.encryptedVaultKeyIv && (
+            <Button variant="outline" onClick={() => router.push('/setup-vault')}>
+              Create master password
+            </Button>
+          )}
         </EmptyContent>
       </Empty>
     );
@@ -156,7 +196,7 @@ export default function VaultClient({ initialVaults }: { initialVaults: VaultIte
             <span className="inline-block">Pinned</span>
           </div>
           <div className="mb-8 grid gap-4 md:grid-cols-2">
-            {pinnedItems.map((vault: VaultItem) => {
+            {pinnedItems.map((vault) => {
               const Icon = typeIcons[vault.type];
 
               return (
@@ -177,7 +217,7 @@ export default function VaultClient({ initialVaults }: { initialVaults: VaultIte
         <section>
           <span className="mb-2 inline-block">Others</span>
           <div className="mb-8 grid gap-4 md:grid-cols-2">
-            {otherItems.map((vault: VaultItem) => {
+            {otherItems.map((vault) => {
               const Icon = typeIcons[vault.type];
 
               return (

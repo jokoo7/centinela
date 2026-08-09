@@ -118,8 +118,6 @@ export default function VaultClient({
     NOTE: FileText,
   };
 
-  // console.log({ key: vaultKey, isUnlocked });
-
   if (!isUnlocked) {
     return (
       <Empty>

@@ -1,17 +1,12 @@
 'use client';
 
-import { InputPassword } from '@/components/input-password';
 import LoadingButton from '@/components/loading-button';
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
-import { Spinner } from '@/components/ui/spinner';
+import { Field, FieldDescription, FieldError, FieldGroup } from '@/components/ui/field';
 import { useUsernameAvailability } from '@/hooks/use-username-availability';
 import { authClient } from '@/lib/auth-client';
+import { useAppForm } from '@/lib/form';
 import { cn } from '@/lib/utils';
 import { registerSchema } from '@/validation/auth-schema';
-import { useForm } from '@tanstack/react-form';
-import { Check, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -37,7 +32,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
   const { checking, available, checkError, checkUsername } = useUsernameAvailability();
   const router = useRouter();
 
-  const form = useForm({
+  const form = useAppForm({
     defaultValues: {
       name: '',
       username: '',
@@ -82,122 +77,49 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
       <FieldGroup>
         {error && <FieldError>{error}</FieldError>}
 
-        <form.Field name="name">
-          {(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid} className="text-start">
-                <FieldLabel htmlFor={field.name}>Full Name</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    field.handleChange(value);
+        <form.AppField name="name">
+          {(field) => (
+            <field.TextField
+              label="Full Name"
+              placeholder="Bahlil Ganteng"
+              onChange={(e) => {
+                const value = e.target.value;
+                field.handleChange(value);
 
-                    if (!usernameTouched) {
-                      const slug = slugifyUsername(value);
-                      form.setFieldValue('username', slug);
-                      checkUsername(slug);
-                    }
-                  }}
-                  placeholder="Bahlil Ganteng"
-                  autoComplete="name"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        </form.Field>
+                if (!usernameTouched) {
+                  const slug = slugifyUsername(value);
+                  form.setFieldValue('username', slug);
+                  checkUsername(slug);
+                }
+              }}
+            />
+          )}
+        </form.AppField>
 
-        <form.Field name="username">
-          {(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid} className="text-start">
-                <FieldLabel htmlFor={field.name}>Username</FieldLabel>
-                <InputGroup>
-                  <InputGroupInput
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => {
-                      setUsernameTouched(true);
-                      field.handleChange(e.target.value);
-                      checkUsername(e.target.value);
-                    }}
-                    placeholder="e.g. bahlil_ganteng"
-                    autoComplete="username"
-                  />
-                  <InputGroupAddon align="inline-end">
-                    {checking && <Spinner />}
-                    {!checking && available === true && <Check className="text-green-800" />}
-                    {!checking && available === false && <X className="text-destructive" />}
-                  </InputGroupAddon>
-                </InputGroup>
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+        <form.AppField name="username">
+          {(field) => (
+            <field.TextField
+              label="Username"
+              variant="group"
+              dataVariantGroup={{
+                checking,
+                available,
+                checkError,
+                checkUsername,
+                setUsernameTouched,
+              }}
+              placeholder="e.g. bahlil_ganteng"
+            />
+          )}
+        </form.AppField>
 
-                {!checking && available === true && (
-                  <FieldDescription className="text-green-800">
-                    Username is available
-                  </FieldDescription>
-                )}
-                {!checking && available === false && (
-                  <FieldDescription className="text-destructive">
-                    Username is already taken
-                  </FieldDescription>
-                )}
-                {checkError && (
-                  <FieldDescription className="text-destructive">{checkError}</FieldDescription>
-                )}
-              </Field>
-            );
-          }}
-        </form.Field>
+        <form.AppField name="email">
+          {(field) => <field.TextField label="Email" placeholder="your@gmail.com" />}
+        </form.AppField>
 
-        <form.Field name="email">
-          {(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid} className="text-start">
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="your@gmail.com"
-                  autoComplete="email"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        </form.Field>
-
-        <form.Field name="password">
-          {(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid} className="text-start">
-                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                <InputPassword
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Password"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        </form.Field>
+        <form.AppField name="password">
+          {(field) => <field.PasswordField label="Password" placeholder="Password" />}
+        </form.AppField>
 
         <form.Subscribe selector={(state) => [state.isSubmitting, state.canSubmit] as const}>
           {([isSubmitting, canSubmit]) => (

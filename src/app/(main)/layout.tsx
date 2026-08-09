@@ -1,5 +1,6 @@
 import Navbar from '@/components/navbar';
 import WrapperContent from '@/components/wrapper-content';
+import { VaultKeyProvider } from '@/hooks/use-vault-key';
 import React from 'react';
 
 export default async function layout({
@@ -8,9 +9,11 @@ export default async function layout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="relative flex min-h-screen flex-col">
-      <Navbar />
-      <WrapperContent className="my-12">{children}</WrapperContent>
-    </main>
+    <VaultKeyProvider>
+      <main className="relative flex min-h-screen flex-col">
+        <Navbar />
+        <WrapperContent className="my-12">{children}</WrapperContent>
+      </main>
+    </VaultKeyProvider>
   );
 }

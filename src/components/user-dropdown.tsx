@@ -11,18 +11,24 @@ import {
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import Link from 'next/link';
-import { CircleUserRound, LogOutIcon, Vault } from 'lucide-react';
+import { CircleUserRound, Loader2, LogOutIcon, Vault } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { User } from '@/lib/auth';
 import { useVaultKey } from '@/hooks/use-vault-key';
+import { useSignOutState } from '@/hooks/use-signout';
 
 export default function UserDropdown({ user }: { user: User }) {
   const { lock } = useVaultKey();
   const router = useRouter();
 
+  const isSignOut = useSignOutState((s) => s.isSignOut);
+  const setSignOut = useSignOutState((s) => s.setSignOut);
+
   async function handleLogout() {
+    setSignOut(true);
+
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
@@ -31,6 +37,7 @@ export default function UserDropdown({ user }: { user: User }) {
           router.push('/login');
         },
         onError: (ctx) => {
+          setSignOut(false);
           toast(ctx.error.message || 'Something went wrong');
         },
       },
@@ -40,7 +47,7 @@ export default function UserDropdown({ user }: { user: User }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full">
+        <Button variant="ghost" size="icon" className="rounded-full" disabled={isSignOut}>
           <Avatar>
             <AvatarImage src="https://github.com/shadcn.png" alt="shadcn" />
             <AvatarFallback>LR</AvatarFallback>
@@ -63,7 +70,7 @@ export default function UserDropdown({ user }: { user: User }) {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem variant="destructive" onClick={handleLogout}>
-            <LogOutIcon />
+            {isSignOut ? <Loader2 className="animate-spin" /> : <LogOutIcon />}
             Sign Out
           </DropdownMenuItem>
         </DropdownMenuGroup>

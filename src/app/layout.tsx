@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Architects_Daughter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
-import { VaultKeyProvider } from '@/hooks/use-vault-key';
+import { SignOutOverlay } from '@/components/signout-overlay';
 
 const fontSans = Architects_Daughter({
   subsets: ['latin'],
@@ -23,16 +23,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={` ${fontSans.variable} antialiased`}>
-        <VaultKeyProvider>
-          {children}
-          <Toaster
-            toastOptions={{
-              classNames: {
-                toast: 'font-sans',
-              },
-            }}
-          />
-        </VaultKeyProvider>
+        {children}
+        <Toaster
+          toastOptions={{
+            classNames: {
+              toast: 'font-sans',
+            },
+          }}
+        />
+        <SignOutOverlay />
       </body>
     </html>
   );

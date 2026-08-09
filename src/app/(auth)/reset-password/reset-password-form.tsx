@@ -1,11 +1,10 @@
 'use client';
 
-import { InputPassword } from '@/components/input-password';
 import LoadingButton from '@/components/loading-button';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Field, FieldError, FieldGroup } from '@/components/ui/field';
 import { authClient } from '@/lib/auth-client';
+import { useAppForm } from '@/lib/form';
 import { withPasswordSchema } from '@/validation/auth-schema';
-import { useForm } from '@tanstack/react-form';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -14,7 +13,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const form = useForm({
+  const form = useAppForm({
     defaultValues: {
       password: '',
     },
@@ -54,26 +53,9 @@ export default function ResetPasswordForm({ token }: { token: string }) {
       className="flex w-full flex-col gap-4"
     >
       <FieldGroup>
-        <form.Field name="password">
-          {(field) => {
-            const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-            return (
-              <Field data-invalid={isInvalid} className="text-start">
-                <FieldLabel htmlFor={field.name}>New password</FieldLabel>
-                <InputPassword
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="Enter new password"
-                  autoComplete="new-password"
-                />
-                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-              </Field>
-            );
-          }}
-        </form.Field>
+        <form.AppField name="password">
+          {(field) => <field.PasswordField label="New password" placeholder="Enter new password" />}
+        </form.AppField>
 
         <form.Subscribe selector={(state) => [state.isSubmitting, state.canSubmit] as const}>
           {([isSubmitting, canSubmit]) => (

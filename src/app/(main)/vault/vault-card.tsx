@@ -4,16 +4,16 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import VaultForm from './vault-form';
 import DeleteVault from './delete-vault';
-import { VaultItem } from '@/types/vault-type';
+import { DecryptedVaultItem } from '@/types/vault-type';
 import { Dispatch, ForwardRefExoticComponent, RefAttributes, SetStateAction } from 'react';
 import { LucideProps, Pin } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn, formatRelativeDate } from '@/lib/utils';
 
 interface VaultCardProps {
-  vault: VaultItem | null;
+  vault: DecryptedVaultItem | null;
   Icon: ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>;
-  setVault: Dispatch<SetStateAction<VaultItem | null>>;
+  setVault: Dispatch<SetStateAction<DecryptedVaultItem | null>>;
   setDetailOpen: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -56,7 +56,7 @@ export default function VaultCard({ vault, Icon, setVault, setDetailOpen }: Vaul
           <Pin />
           <span className="inline">{vault.pinned ? 'Pinned' : 'Pin'}</span>
         </Button>
-        <VaultForm existingItem={vault} itemId="22323" />
+        <VaultForm existingItem={vault} itemId={vault.id} />
         <DeleteVault />
       </CardFooter>
     </Card>

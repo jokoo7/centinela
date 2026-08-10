@@ -42,13 +42,16 @@ export async function decryptData(payload: EncryptedPayload, vaultKey: CryptoKey
 }
 
 // Mengenkripsi object agar bisa disimpan ke database
-export async function encryptVaultItem<T>(data: T, vaultKey: CryptoKey): Promise<EncryptedPayload> {
+export async function encryptVaultItemData<T>(
+  data: T,
+  vaultKey: CryptoKey,
+): Promise<EncryptedPayload> {
   // Ubah object menjadi JSON lalu enkripsi
   return encryptData(JSON.stringify(data), vaultKey);
 }
 
 // Mendekripsi data dari database menjadi object kembali
-export async function decryptVaultItem<T>(
+export async function decryptVaultItemData<T>(
   payload: EncryptedPayload,
   vaultKey: CryptoKey,
 ): Promise<T> {

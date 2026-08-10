@@ -37,11 +37,11 @@ export interface VaultItemMetadata {
 }
 
 // type gabungan metadata + vault
-export type VaultItem = VaultItemMetadata & {
+export type DecryptedVaultItem = VaultItemMetadata & {
   id: string;
   createdAt: string;
   updatedAt: string;
 } & VaultItemPlaintext;
 
 // type gabungan metadata + vault tanpa `credentialHistoty`
-export type VaultItemFormValues = VaultItemMetadata & VaultItemPlaintext;
+export type DecryptedVaultItemFormValues = VaultItemMetadata & VaultItemPlaintext;

@@ -1,4 +1,4 @@
-import { VaultItemFormValues } from '@/types/vault-type';
+import { DecryptedVaultItemFormValues } from '@/types/vault-type';
 import * as z from 'zod';
 
 const phonePattern = /^[0-9+()\- ]+$/;
@@ -68,8 +68,8 @@ export const vaultItemFormSchema = z.discriminatedUnion('type', [
 ]);
 
 type _SchemaMatchesType =
-  z.infer<typeof vaultItemFormSchema> extends VaultItemFormValues
-    ? VaultItemFormValues extends z.infer<typeof vaultItemFormSchema>
+  z.infer<typeof vaultItemFormSchema> extends DecryptedVaultItemFormValues
+    ? DecryptedVaultItemFormValues extends z.infer<typeof vaultItemFormSchema>
       ? true
       : false
     : false;

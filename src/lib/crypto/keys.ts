@@ -48,7 +48,7 @@ export async function generateVaultKey(): Promise<CryptoKey> {
 }
 
 // Mengenkripsi (wrap) vaultKey menggunakan masterKey
-// Hasilnya disimpan sebagai encryptedVaultKey + iv di database
+// Hasilnya disimpan sebagai encryptedVaultKey + iv di database user
 export async function wrapVaultKey(
   vaultKey: CryptoKey,
   masterKey: CryptoKey,

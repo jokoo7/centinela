@@ -2,15 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Dialog,
   DialogClose,
   DialogContent,
@@ -20,20 +11,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useForm } from '@tanstack/react-form';
+import { Field, FieldGroup } from '@/components/ui/field';
 import { Edit2, Plus } from 'lucide-react';
 import LoadingButton from '@/components/loading-button';
-import { VaultItemFormValues, VaultItemMetadata, VaultItemPlaintext } from '@/types/vault-type';
+import {
+  DecryptedVaultItemFormValues,
+  VaultItemMetadata,
+  VaultItemPlaintext,
+} from '@/types/vault-type';
 import { vaultItemFormSchema } from '@/validation/vault-schema';
 import { useEffect } from 'react';
-import { Textarea } from '@/components/ui/textarea';
-import { InputPassword } from '@/components/input-password';
 import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group';
+import { useAppForm } from '@/lib/form';
+import { encryptVaultItemData } from '@/lib/crypto/encryption';
+import { useVaultKey } from '@/hooks/use-vault-key';
+import { createEncryptedVaultItem, updateEncryptedVaultItem } from './action';
+import { toast } from 'sonner';
 
-function defaultAccountValues(): VaultItemFormValues {
+function defaultAccountValues(): DecryptedVaultItemFormValues {
   return {
     title: '',
     url: '',
@@ -50,7 +45,7 @@ function defaultAccountValues(): VaultItemFormValues {
   };
 }
 
-function defaultNoteValues(): VaultItemFormValues {
+function defaultNoteValues(): DecryptedVaultItemFormValues {
   return {
     title: '',
     url: '',
@@ -62,7 +57,7 @@ function defaultNoteValues(): VaultItemFormValues {
   };
 }
 
-function toFormValues(item: VaultItemMetadata & VaultItemPlaintext): VaultItemFormValues {
+function toFormValues(item: VaultItemMetadata & VaultItemPlaintext): DecryptedVaultItemFormValues {
   if (item.type === 'ACCOUNT') {
     const { email, username, phone, password, pin, notes } = item.data;
     return { ...item, data: { email, username, phone, password, pin, notes } };
@@ -76,17 +71,39 @@ type VaultFormProps =
   | { existingItem: VaultItemMetadata & VaultItemPlaintext; itemId: string };
 
 export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
+  const { vaultKey } = useVaultKey();
+
   const isEditMode = existingItem != undefined;
   // const existingAccountData = existingItem?.type === "ACCOUNT" ? existingItem.data : undefined
 
-  const form = useForm({
+  function switchItemType(
+    newType: DecryptedVaultItemFormValues['type'],
+    current: DecryptedVaultItemFormValues,
+  ): DecryptedVaultItemFormValues {
+    const base = newType === 'ACCOUNT' ? defaultAccountValues() : defaultNoteValues();
+    return { ...base, title: current.title, url: current.url, pinned: current.pinned };
+  }
+
+  const form = useAppForm({
     defaultValues: existingItem ? toFormValues(existingItem) : defaultAccountValues(),
     validators: {
       onChange: vaultItemFormSchema,
     },
     onSubmit: async ({ value }) => {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      console.log(value);
+      // await new Promise((resolve) => setTimeout(resolve, 3000));
+      try {
+        const { data, ...others } = value;
+        const { ciphertext, iv } = await encryptVaultItemData(data, vaultKey!);
+
+        const payload = { ...others, ciphertext, iv };
+        const { error } = isEditMode
+          ? await updateEncryptedVaultItem(itemId, payload)
+          : await createEncryptedVaultItem(payload);
+
+        toast(error ? 'Gagal menyimpan vault' : 'Berhasil menyimpan vault');
+      } catch {
+        toast('Gagal membuat vault');
+      }
     },
   });
 
@@ -135,96 +152,38 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
           <div className="-mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4 pb-4">
             <FieldGroup>
               <div className="flex flex-col gap-3">
-                {/* TYPE */}
-                <form.Field name="type">
-                  {(field) => {
-                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                    return (
-                      <Field>
-                        <Label htmlFor={field.name}>Type</Label>
-                        <Select
-                          value={field.state.value}
-                          onValueChange={(value) => {
-                            const newType = value as VaultItemFormValues['type'];
-                            const current = form.state.values;
-                            const nextValues =
-                              newType === 'ACCOUNT'
-                                ? {
-                                    ...defaultAccountValues(),
-                                    title: current.title,
-                                    url: current.url,
-                                    pinned: current.pinned,
-                                  }
-                                : {
-                                    ...defaultNoteValues(),
-                                    title: current.title,
-                                    url: current.url,
-                                    pinned: current.pinned,
-                                  };
+                <form.AppField name="type">
+                  {(field) => (
+                    <field.SelectField
+                      label="Type"
+                      disabled={isEditMode}
+                      placeholder="-- Select a type --"
+                      groupLabel="Vault Item Type"
+                      options={[
+                        { value: 'ACCOUNT', label: 'Account' },
+                        { value: 'NOTE', label: 'Note' },
+                      ]}
+                      onValueChange={(value) => {
+                        const newType = value as DecryptedVaultItemFormValues['type'];
+                        form.reset(switchItemType(newType, form.state.values));
+                      }}
+                    />
+                  )}
+                </form.AppField>
 
-                            form.reset(nextValues);
-                          }}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="-- Select a type --" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectGroup>
-                              <SelectLabel>Vault Item Type</SelectLabel>
-                              <SelectItem value="ACCOUNT">Account</SelectItem>
-                              <SelectItem value="NOTE">Note</SelectItem>
-                            </SelectGroup>
-                          </SelectContent>
-                        </Select>
-                        {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                      </Field>
-                    );
-                  }}
-                </form.Field>
+                <form.AppField name="title">
+                  {(field) => <field.TextField label="Title" placeholder="e.g. Account Gmail" />}
+                </form.AppField>
 
-                {/* TITLE */}
-                <form.Field name="title">
-                  {(field) => {
-                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                    return (
-                      <Field data-invalid={isInvalid} className="text-start">
-                        <FieldLabel htmlFor={field.name}>Title</FieldLabel>
-                        <Input
-                          id={field.name}
-                          type="text"
-                          name={field.name}
-                          value={field.state.value as string}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          placeholder="e.g. Account Gmail"
-                        />
-                        {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                      </Field>
-                    );
-                  }}
-                </form.Field>
-
-                {/* URL  */}
-                <form.Field name="url">
-                  {(field) => {
-                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                    return (
-                      <Field data-invalid={isInvalid} className="text-start">
-                        <FieldLabel htmlFor={field.name}>URL</FieldLabel>
-                        <Input
-                          type="url"
-                          id={field.name}
-                          name={field.name}
-                          value={field.state.value as string}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          placeholder="https://example.com"
-                        />
-                        {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                      </Field>
-                    );
-                  }}
-                </form.Field>
+                <form.AppField name="url">
+                  {(field) => (
+                    <field.TextField
+                      type="url"
+                      label="URL"
+                      placeholder="e.g. https://example.com"
+                    />
+                  )}
+                </form.AppField>
               </div>
 
               {/* Dynamic Form */}
@@ -240,166 +199,97 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
                       <div className="mb-4 flex flex-col gap-3">
                         <span className="text-base font-medium">Identifiers</span>
 
-                        <form.Field name="data.email">
-                          {(field) => {
-                            const isInvalid =
-                              field.state.meta.isTouched && !field.state.meta.isValid;
-                            return (
-                              <Field data-invalid={isInvalid} className="text-start">
-                                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                                <Input
-                                  id={field.name}
-                                  type="email"
-                                  inputMode="email"
-                                  placeholder="your@gmail.com"
-                                  autoComplete="email"
-                                  value={field.state.value as string}
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e.target.value)}
-                                />
-                                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                              </Field>
-                            );
-                          }}
-                        </form.Field>
+                        <form.AppField name="data.email">
+                          {(field) => (
+                            <field.TextField
+                              label="Email"
+                              type="email"
+                              placeholder="e.g. your@gmail.com"
+                              autoComplete="off"
+                              data-1p-ignore
+                              data-lpignore="true"
+                              data-bwignore
+                            />
+                          )}
+                        </form.AppField>
 
-                        <form.Field name="data.username">
-                          {(field) => {
-                            const isInvalid =
-                              field.state.meta.isTouched && !field.state.meta.isValid;
-                            return (
-                              <Field data-invalid={isInvalid} className="text-start">
-                                <FieldLabel htmlFor={field.name}>Username</FieldLabel>
-                                <Input
-                                  id={field.name}
-                                  type="text"
-                                  inputMode="text"
-                                  placeholder="username"
-                                  autoComplete="username"
-                                  value={field.state.value as string}
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e.target.value)}
-                                />
-                                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                              </Field>
-                            );
-                          }}
-                        </form.Field>
+                        <form.AppField name="data.username">
+                          {(field) => (
+                            <field.TextField
+                              label="Username"
+                              placeholder="e.g. bahlil_ganteng"
+                              autoComplete="off"
+                              data-1p-ignore
+                              data-lpignore="true"
+                              data-bwignore
+                            />
+                          )}
+                        </form.AppField>
 
-                        <form.Field name="data.phone">
-                          {(field) => {
-                            const isInvalid =
-                              field.state.meta.isTouched && !field.state.meta.isValid;
-                            return (
-                              <Field data-invalid={isInvalid} className="text-start">
-                                <FieldLabel htmlFor={field.name}>Phone</FieldLabel>
-                                <Input
-                                  id={field.name}
-                                  type="tel"
-                                  inputMode="tel"
-                                  placeholder="+62 812-xxxx-xxxx"
-                                  autoComplete="tel"
-                                  // pattern="[0-9+()\- ]*"
-                                  value={field.state.value as string}
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e.target.value)}
-                                />
-                                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                              </Field>
-                            );
-                          }}
-                        </form.Field>
+                        <form.AppField name="data.phone">
+                          {(field) => (
+                            <field.TextField
+                              label="Phone"
+                              type="tel"
+                              inputMode="tel"
+                              placeholder="e.g. +62 812-xxxx-xxxx"
+                            />
+                          )}
+                        </form.AppField>
                       </div>
 
                       {/* --- Credentials: field tetap, semua opsional --- */}
                       <div className="mb-4 flex flex-col gap-3">
                         <span className="text-base font-medium">Credentials</span>
 
-                        <form.Field name="data.password">
-                          {(field) => {
-                            const isInvalid =
-                              field.state.meta.isTouched && !field.state.meta.isValid;
-                            return (
-                              <Field data-invalid={isInvalid} className="text-start">
-                                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                                <InputPassword
-                                  id={field.name}
-                                  placeholder="password"
-                                  autoComplete="new-password"
-                                  value={field.state.value as string}
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e.target.value)}
-                                />
-                                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                              </Field>
-                            );
-                          }}
-                        </form.Field>
+                        <form.AppField name="data.password">
+                          {(field) => (
+                            <field.PasswordField
+                              label="Password"
+                              placeholder="Enter password"
+                              autoComplete="new-password"
+                              data-1p-ignore
+                              data-lpignore="true"
+                              data-bwignore
+                            />
+                          )}
+                        </form.AppField>
 
-                        <form.Field name="data.pin">
-                          {(field) => {
-                            const isInvalid =
-                              field.state.meta.isTouched && !field.state.meta.isValid;
-                            return (
-                              <Field data-invalid={isInvalid} className="text-start">
-                                <FieldLabel htmlFor={field.name}>PIN</FieldLabel>
-                                <Input
-                                  id={field.name}
-                                  type="password"
-                                  inputMode="numeric"
-                                  pattern="[0-9]*"
-                                  maxLength={12}
-                                  autoComplete="off"
-                                  placeholder="4-12 digit angka"
-                                  value={field.state.value as string}
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e.target.value)}
-                                />
-                                {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                              </Field>
-                            );
-                          }}
-                        </form.Field>
+                        <form.AppField name="data.pin">
+                          {(field) => (
+                            <field.PasswordField
+                              label="PIN"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              maxLength={12}
+                              placeholder="Enter your digit PIN"
+                              autoComplete="off"
+                              data-1p-ignore
+                              data-lpignore="true"
+                              data-bwignore
+                            />
+                          )}
+                        </form.AppField>
                       </div>
 
-                      <form.Field name="data.notes">
-                        {(field) => {
-                          const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                          return (
-                            <Field data-invalid={isInvalid} className="text-start">
-                              <FieldLabel htmlFor={field.name}>Note (opsional)</FieldLabel>
-                              <Textarea
-                                id={field.name}
-                                value={field.state.value as string}
-                                onBlur={field.handleBlur}
-                                onChange={(e) => field.handleChange(e.target.value)}
-                                placeholder="Type your secure note here."
-                              />
-                              {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                            </Field>
-                          );
-                        }}
-                      </form.Field>
+                      <form.AppField name="data.notes">
+                        {(field) => (
+                          <field.TextareaField
+                            label="Note (opsional)"
+                            placeholder="Type your note here."
+                          />
+                        )}
+                      </form.AppField>
                     </div>
                   ) : (
-                    <form.Field name="data.content">
-                      {(field) => {
-                        const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                        return (
-                          <Field data-invalid={isInvalid} className="text-start">
-                            <FieldLabel htmlFor={field.name}>Secure Note</FieldLabel>
-                            <Textarea
-                              id={field.name}
-                              value={field.state.value as string}
-                              onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              placeholder="Type your secure note here."
-                            />
-                            {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                          </Field>
-                        );
-                      }}
-                    </form.Field>
+                    <form.AppField name="data.content">
+                      {(field) => (
+                        <field.TextareaField
+                          label="Secure Note"
+                          placeholder="Type your secure note here."
+                        />
+                      )}
+                    </form.AppField>
                   )
                 }
               </form.Subscribe>

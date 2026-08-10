@@ -1,9 +1,7 @@
 'use client';
 
-import { InputPassword } from '@/components/input-password';
 import LoadingButton from '@/components/loading-button';
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import { Field, FieldDescription, FieldError, FieldGroup } from '@/components/ui/field';
 import { useSignOutState } from '@/hooks/use-signout';
 import { authClient } from '@/lib/auth-client';
 import { useAppForm } from '@/lib/form';

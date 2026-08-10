@@ -15,7 +15,7 @@ import { Field } from '@/components/ui/field';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { cn, formatDate } from '@/lib/utils';
-import { VaultItem } from '@/types/vault-type';
+import { DecryptedVaultItem } from '@/types/vault-type';
 import { Calendar, CircleCheckBig, Copy, Eye, EyeOff, FileText, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -23,7 +23,7 @@ import { useState } from 'react';
 interface VaultDetailProps extends React.ComponentProps<typeof Dialog> {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  vault: VaultItem | null;
+  vault: DecryptedVaultItem | null;
 }
 
 export default function VaultDetail({ open, onOpenChange, vault, ...props }: VaultDetailProps) {

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import VaultForm from './vault-form';
 import { FileText, Pin, Search, UserRound, UserRoundKey, Vault } from 'lucide-react';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
-import { AccountData, NoteData, VaultItem as VaultAsType, VaultItemType } from '@/types/vault-type';
+import { AccountData, NoteData, DecryptedVaultItem, VaultItemType } from '@/types/vault-type';
 import { useEffect, useMemo, useOptimistic, useState, useTransition } from 'react';
 import VaultCard from './vault-card';
 import VaultDetail from './vault-detail';
@@ -20,8 +20,8 @@ import {
 } from '@/components/ui/empty';
 import { useRouter } from 'next/navigation';
 import UnlockVault from './unlock-vault';
-import { VaultItem } from '@/lib/generated/prisma/client';
-import { decryptVaultItem } from '@/lib/crypto/encryption';
+import { VaultItem as VaultItemRecord } from '@/lib/generated/prisma/client';
+import { decryptVaultItemData } from '@/lib/crypto/encryption';
 import { User } from '@/lib/auth';
 
 type FilterType = VaultItemType | 'ALL';
@@ -30,7 +30,7 @@ export default function VaultClient({
   initialVaults,
   session,
 }: {
-  initialVaults: VaultItem[];
+  initialVaults: VaultItemRecord[];
   session: User;
 }) {
   const { isUnlocked, vaultKey } = useVaultKey();
@@ -38,8 +38,8 @@ export default function VaultClient({
   const [detailOpen, setDetailOpen] = useState(false);
   const [filter, setFilter] = useState<FilterType>('ALL');
   const [search, setSearch] = useState('');
-  const [selectedVault, setSelectedVault] = useState<VaultAsType | null>(null);
-  const [decryptedItems, setDecryptedItems] = useState<VaultAsType[] | null>(null);
+  const [selectedVault, setSelectedVault] = useState<DecryptedVaultItem | null>(null);
+  const [decryptedItems, setDecryptedItems] = useState<DecryptedVaultItem[] | null>(null);
   const [, startTransition] = useTransition();
   const router = useRouter();
 
@@ -54,11 +54,11 @@ export default function VaultClient({
 
     Promise.all(
       initialVaults.map(async (item) => {
-        const data: AccountData | NoteData = await decryptVaultItem(
+        const data: AccountData | NoteData = await decryptVaultItemData(
           { ciphertext: item.ciphertext, iv: item.iv },
           vaultKey,
         );
-        return { ...item, data } as unknown as VaultAsType;
+        return { ...item, data } as unknown as DecryptedVaultItem;
       }),
     ).then((result) => {
       if (!cancelled) setDecryptedItems(result);
@@ -92,8 +92,12 @@ export default function VaultClient({
     const filtered = filter === 'ALL' ? bySearch : bySearch.filter((item) => item.type === filter);
 
     return {
-      pinnedItems: filtered.filter((item) => item.pinned),
-      otherItems: filtered.filter((item) => !item.pinned),
+      pinnedItems: filtered
+        .filter((item) => item.pinned)
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
+      otherItems: filtered
+        .filter((item) => !item.pinned)
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
       isEmpty: filtered.length === 0,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

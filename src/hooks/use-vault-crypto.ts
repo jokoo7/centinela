@@ -23,7 +23,7 @@ export function useVaultCrypto() {
       if (!vaultKey) throw new Error('Vault is locked — cannot encrypt');
 
       // Encrypt data menggunakan vaultKey
-      return encryptVaultItem(data, vaultKey);
+      return encryptVaultItemData(data, vaultKey);
     },
     // Buat ulang fungsi jika vaultKey berubah
     [vaultKey],
@@ -36,7 +36,7 @@ export function useVaultCrypto() {
       if (!vaultKey) throw new Error('Vault is locked — cannot decrypt');
 
       // Decrypt data menggunakan vaultKey
-      return decryptVaultItem(payload, vaultKey);
+      return decryptVaultItemData(payload, vaultKey);
     },
     // Buat ulang fungsi jika vaultKey berubah
     [vaultKey],

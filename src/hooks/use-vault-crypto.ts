@@ -2,7 +2,11 @@
 
 import { useCallback } from 'react';
 import { useVaultKey } from './use-vault-key';
-import { decryptVaultItem, encryptVaultItem, type EncryptedPayload } from '@/lib/crypto/encryption';
+import {
+  decryptVaultItemData,
+  encryptVaultItemData,
+  type EncryptedPayload,
+} from '@/lib/crypto/encryption';
 
 /**
  * Hook untuk mengenkripsi dan mendekripsi data

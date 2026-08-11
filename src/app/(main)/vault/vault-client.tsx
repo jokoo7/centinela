@@ -21,7 +21,7 @@ import {
 import { useRouter } from 'next/navigation';
 import UnlockVault from './unlock-vault';
 import { VaultItem as VaultItemRecord } from '@/lib/generated/prisma/client';
-import { decryptVaultItemData } from '@/lib/crypto/encryption';
+import { decryptData } from '@/lib/crypto/encryption';
 import { User } from '@/lib/auth';
 
 type FilterType = VaultItemType | 'ALL';
@@ -54,7 +54,7 @@ export default function VaultClient({
 
     Promise.all(
       initialVaults.map(async (item) => {
-        const data: AccountData | NoteData = await decryptVaultItemData(
+        const data: AccountData | NoteData = await decryptData(
           { ciphertext: item.ciphertext, iv: item.iv },
           vaultKey,
         );

@@ -14,21 +14,17 @@ import {
 import { Field, FieldGroup } from '@/components/ui/field';
 import { Edit2, Plus } from 'lucide-react';
 import LoadingButton from '@/components/loading-button';
-import {
-  DecryptedVaultItemFormValues,
-  VaultItemMetadata,
-  VaultItemPlaintext,
-} from '@/types/vault-type';
+import { DecryptedVaultItem, VaultItemFormInput } from '@/types/vault-type';
 import { vaultItemFormSchema } from '@/validation/vault-schema';
 import { useEffect } from 'react';
 import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group';
 import { useAppForm } from '@/lib/form';
-import { encryptVaultItemData } from '@/lib/crypto/encryption';
+import { encryptData } from '@/lib/crypto/encryption';
 import { useVaultKey } from '@/hooks/use-vault-key';
 import { createEncryptedVaultItem, updateEncryptedVaultItem } from './action';
 import { toast } from 'sonner';
 
-function defaultAccountValues(): DecryptedVaultItemFormValues {
+function defaultAccountValues(): VaultItemFormInput {
   return {
     title: '',
     url: '',
@@ -45,7 +41,7 @@ function defaultAccountValues(): DecryptedVaultItemFormValues {
   };
 }
 
-function defaultNoteValues(): DecryptedVaultItemFormValues {
+function defaultNoteValues(): VaultItemFormInput {
   return {
     title: '',
     url: '',
@@ -57,18 +53,20 @@ function defaultNoteValues(): DecryptedVaultItemFormValues {
   };
 }
 
-function toFormValues(item: VaultItemMetadata & VaultItemPlaintext): DecryptedVaultItemFormValues {
+function toFormValues(item: DecryptedVaultItem): VaultItemFormInput {
+  const base = { title: item.title, url: item.url ?? undefined, pinned: item.pinned };
+
   if (item.type === 'ACCOUNT') {
     const { email, username, phone, password, pin, notes } = item.data;
-    return { ...item, data: { email, username, phone, password, pin, notes } };
+    return { ...base, type: 'ACCOUNT', data: { email, username, phone, password, pin, notes } };
   }
 
-  return item;
+  return { ...base, type: 'NOTE', data: { content: item.data.content } };
 }
 
 type VaultFormProps =
   | { existingItem?: undefined; itemId?: undefined }
-  | { existingItem: VaultItemMetadata & VaultItemPlaintext; itemId: string };
+  | { existingItem: DecryptedVaultItem; itemId: string };
 
 export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
   const { vaultKey } = useVaultKey();
@@ -77,9 +75,9 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
   // const existingAccountData = existingItem?.type === "ACCOUNT" ? existingItem.data : undefined
 
   function switchItemType(
-    newType: DecryptedVaultItemFormValues['type'],
-    current: DecryptedVaultItemFormValues,
-  ): DecryptedVaultItemFormValues {
+    newType: VaultItemFormInput['type'],
+    current: VaultItemFormInput,
+  ): VaultItemFormInput {
     const base = newType === 'ACCOUNT' ? defaultAccountValues() : defaultNoteValues();
     return { ...base, title: current.title, url: current.url, pinned: current.pinned };
   }
@@ -93,7 +91,7 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
       // await new Promise((resolve) => setTimeout(resolve, 3000));
       try {
         const { data, ...others } = value;
-        const { ciphertext, iv } = await encryptVaultItemData(data, vaultKey!);
+        const { ciphertext, iv } = await encryptData(data, vaultKey!);
 
         const payload = { ...others, ciphertext, iv };
         const { error } = isEditMode
@@ -164,7 +162,7 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
                         { value: 'NOTE', label: 'Note' },
                       ]}
                       onValueChange={(value) => {
-                        const newType = value as DecryptedVaultItemFormValues['type'];
+                        const newType = value as VaultItemFormInput['type'];
                         form.reset(switchItemType(newType, form.state.values));
                       }}
                     />

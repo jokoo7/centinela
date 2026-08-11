@@ -1,3 +1,5 @@
+import { VaultItem as PrismaVaultItem } from '@/lib/generated/prisma/client';
+
 export type CredentialType = 'PASSWORD' | 'PIN';
 export type VaultItemType = 'ACCOUNT' | 'NOTE';
 
@@ -25,7 +27,7 @@ export interface NoteData {
   content: string;
 }
 
-export type VaultItemPlaintext =
+export type VaultItemData =
   | { type: 'ACCOUNT'; data: AccountData }
   | { type: 'NOTE'; data: NoteData };
 
@@ -37,11 +39,8 @@ export interface VaultItemMetadata {
 }
 
 // type gabungan metadata + vault
-export type DecryptedVaultItem = VaultItemMetadata & {
-  id: string;
-  createdAt: string;
-  updatedAt: string;
-} & VaultItemPlaintext;
+export type DecryptedVaultItem = Omit<PrismaVaultItem, 'ciphertext' | 'iv' | 'type'> &
+  VaultItemData;
 
-// type gabungan metadata + vault tanpa `credentialHistoty`
-export type DecryptedVaultItemFormValues = VaultItemMetadata & VaultItemPlaintext;
+// Draft form input sebelum disimpan (belum ada id/timestamp/credentialHistory)
+export type VaultItemFormInput = VaultItemMetadata & VaultItemData;

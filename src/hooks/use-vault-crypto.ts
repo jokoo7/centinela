@@ -2,11 +2,7 @@
 
 import { useCallback } from 'react';
 import { useVaultKey } from './use-vault-key';
-import {
-  decryptVaultItemData,
-  encryptVaultItemData,
-  type EncryptedPayload,
-} from '@/lib/crypto/encryption';
+import { decryptData, encryptData, type EncryptedPayload } from '@/lib/crypto/encryption';
 
 /**
  * Hook untuk mengenkripsi dan mendekripsi data
@@ -23,7 +19,7 @@ export function useVaultCrypto() {
       if (!vaultKey) throw new Error('Vault is locked — cannot encrypt');
 
       // Encrypt data menggunakan vaultKey
-      return encryptVaultItemData(data, vaultKey);
+      return encryptData(data, vaultKey);
     },
     // Buat ulang fungsi jika vaultKey berubah
     [vaultKey],
@@ -36,7 +32,7 @@ export function useVaultCrypto() {
       if (!vaultKey) throw new Error('Vault is locked — cannot decrypt');
 
       // Decrypt data menggunakan vaultKey
-      return decryptVaultItemData(payload, vaultKey);
+      return decryptData(payload, vaultKey);
     },
     // Buat ulang fungsi jika vaultKey berubah
     [vaultKey],

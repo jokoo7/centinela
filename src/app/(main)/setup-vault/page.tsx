@@ -1,4 +1,4 @@
-import CenteredFormLayout from '@/components/layout/centered-form-layout';
+import CenteredFormLayout from '@/components/wrapped-form';
 import SetupVaultForm from './setup-vault-form';
 import { getServerSession } from '@/lib/get-session';
 import { redirect } from 'next/navigation';
@@ -9,12 +9,18 @@ export default async function SetupUnlockPage() {
 
   if (!user) redirect('/login');
 
+  const isHaveVault = user.encryptedVaultKey !== null && user.encryptedVaultKeyIv !== null;
+
+  if (isHaveVault) redirect('/vault');
+
   return (
-    <CenteredFormLayout
-      title="Create Your Vault"
-      description="Set a strong master password to secure your data"
-    >
-      <SetupVaultForm user={user} />
-    </CenteredFormLayout>
+    <div className="flex justify-center">
+      <CenteredFormLayout
+        title="Create Your Vault"
+        description="Set a strong master password to secure your data"
+      >
+        <SetupVaultForm user={user} />
+      </CenteredFormLayout>
+    </div>
   );
 }

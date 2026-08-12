@@ -1,4 +1,4 @@
-import CenteredFormLayout from '@/components/layout/centered-form-layout';
+import CenteredFormLayout from '@/components/wrapped-form';
 import ForgotPasswordForm from './forgot-password-form';
 
 export default function ForgotPasswordPage() {

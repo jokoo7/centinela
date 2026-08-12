@@ -11,5 +11,7 @@ export default async function layout({
 
   if (user) redirect('/vault');
 
-  return <main>{children}</main>;
+  return (
+    <main className="flex min-h-svh flex-col items-center justify-center p-6">{children}</main>
+  );
 }

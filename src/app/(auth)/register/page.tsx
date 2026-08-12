@@ -1,6 +1,6 @@
 import RegisterForm from './register-form';
 import { Metadata } from 'next';
-import CenteredFormLayout from '@/components/layout/centered-form-layout';
+import CenteredFormLayout from '@/components/wrapped-form';
 
 export const metadata: Metadata = {
   title: 'Register',

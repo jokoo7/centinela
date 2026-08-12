@@ -1,5 +1,5 @@
 import ResetPasswordForm from './reset-password-form';
-import CenteredFormLayout from '@/components/layout/centered-form-layout';
+import CenteredFormLayout from '@/components/wrapped-form';
 
 export default async function ResetPasswordPage({
   searchParams,

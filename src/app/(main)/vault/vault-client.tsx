@@ -41,10 +41,8 @@ export default function VaultClient({
 }) {
   const { isUnlocked, vaultKey } = useVaultKey();
 
-  const [detailOpen, setDetailOpen] = useState(false);
   const [filter, setFilter] = useState<FilterType>('ALL');
   const [search, setSearch] = useState('');
-  const [selectedVault, setSelectedVault] = useState<DecryptedVaultItem | null>(null);
   const [decryptedItems, setDecryptedItems] = useState<DecryptedVaultItem[] | null>(null);
   const [, startTransition] = useTransition();
   const router = useRouter();

@@ -2,7 +2,6 @@ import { Trash2 } from 'lucide-react';
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -13,10 +12,36 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { deleteVaultItem } from './action';
+import { toast } from 'sonner';
+import { useState } from 'react';
+import LoadingButton from '@/components/loading-button';
 
-export default function DeleteVault() {
+export default function DeleteVault({ id }: { id: string }) {
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  if (!id) return null;
+
+  async function deleteVault() {
+    setLoading(true);
+    try {
+      const { error } = await deleteVaultItem(id);
+      if (error) {
+        toast('Gagal hapus vault');
+        return;
+      }
+      toast('Berhasil hapus vault');
+      setOpen(false);
+    } catch {
+      toast('Gagal hapus vault');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" size="icon">
           <Trash2 />
@@ -29,13 +54,16 @@ export default function DeleteVault() {
           </AlertDialogMedia>
           <AlertDialogTitle>Delete vault?</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete this vault item? This action cannot be undone, and the
+            Are you sure you want to delete this vault item with ID{' '}
+            <span className="text-destructive">{id}</span>? This action cannot be undone, and the
             item will be permanently removed from your vault.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive">Delete</AlertDialogAction>
+          <LoadingButton variant="destructive" onClick={deleteVault} loading={loading}>
+            Delete
+          </LoadingButton>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

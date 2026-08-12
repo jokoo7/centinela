@@ -22,6 +22,7 @@ import { useAppForm } from '@/lib/form';
 import { encryptData } from '@/lib/crypto/encryption';
 import { useVaultKey } from '@/hooks/use-vault-key';
 import { createEncryptedVaultItem, updateEncryptedVaultItem } from './action';
+import isEqual from 'lodash.isequal';
 import { toast } from 'sonner';
 
 function defaultAccountValues(): VaultItemFormInput {
@@ -64,14 +65,20 @@ function toFormValues(item: DecryptedVaultItem): VaultItemFormInput {
   return { ...base, type: 'NOTE', data: { content: item.data.content } };
 }
 
-type VaultFormProps =
-  | { existingItem?: undefined; itemId?: undefined }
-  | { existingItem: DecryptedVaultItem; itemId: string };
+// type VaultFormProps =
+//   | { existingItem?: undefined; itemId?: undefined }
+//   | { existingItem: DecryptedVaultItem; itemId: string };
+interface VaultFormProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  existingItem?: DecryptedVaultItem;
+  itemId?: string;
+}
 
-export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
+export default function VaultForm({ open, onOpenChange, existingItem, itemId }: VaultFormProps) {
   const { vaultKey } = useVaultKey();
 
-  const isEditMode = existingItem != undefined;
+  const isEditMode = existingItem != undefined && itemId !== undefined;
   // const existingAccountData = existingItem?.type === "ACCOUNT" ? existingItem.data : undefined
 
   function switchItemType(
@@ -89,6 +96,17 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
     },
     onSubmit: async ({ value }) => {
       // await new Promise((resolve) => setTimeout(resolve, 3000));
+      const parsed = vaultItemFormSchema.parse(value);
+
+      if (isEditMode) {
+        const originalValues = vaultItemFormSchema.parse(toFormValues(existingItem));
+        if (isEqual(parsed, originalValues)) {
+          toast('Tidak ada perubahan untuk disimpan');
+          onOpenChange(false);
+          return;
+        }
+      }
+
       try {
         const { data, ...others } = value;
         const { ciphertext, iv } = await encryptData(data, vaultKey!);
@@ -98,7 +116,12 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
           ? await updateEncryptedVaultItem(itemId, payload)
           : await createEncryptedVaultItem(payload);
 
-        toast(error ? 'Gagal menyimpan vault' : 'Berhasil menyimpan vault');
+        if (error) {
+          toast('Gagal menyimpan vault');
+          return;
+        }
+        toast('Berhasil menyimpan vault');
+        onOpenChange(false);
       } catch {
         toast('Gagal membuat vault');
       }
@@ -115,8 +138,14 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
   }, [itemId]);
 
   return (
-    <Dialog onOpenChange={(c) => !c && form.reset()}>
-      <DialogTrigger asChild>
+    <Dialog
+      open={open}
+      onOpenChange={(c) => {
+        onOpenChange(c);
+        if (!c) form.reset();
+      }}
+    >
+      {/* <DialogTrigger asChild>
         {isEditMode ? (
           <Button variant="secondary" size="icon">
             <Edit2 />
@@ -130,7 +159,7 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
             </Button>
           </ButtonGroup>
         )}
-      </DialogTrigger>
+      </DialogTrigger> */}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit Vault' : 'Add New Vault'}</DialogTitle>
@@ -297,14 +326,23 @@ export default function VaultForm({ existingItem, itemId }: VaultFormProps) {
             <DialogClose asChild>
               <Button variant="outline">Close</Button>
             </DialogClose>
-            <form.Subscribe selector={(state) => [state.isSubmitting, state.canSubmit] as const}>
-              {([isSubmitting, canSubmit]) => (
-                <Field className="sm:w-fit">
-                  <LoadingButton loading={isSubmitting} disabled={!canSubmit} type="submit">
-                    Save
-                  </LoadingButton>
-                </Field>
-              )}
+            <form.Subscribe
+              selector={(state) => [state.isSubmitting, state.canSubmit, state.values] as const}
+            >
+              {([isSubmitting, canSubmit, values]) => {
+                const noChange = isEditMode && isEqual(values, toFormValues(existingItem));
+                return (
+                  <Field className="sm:w-fit">
+                    <LoadingButton
+                      loading={isSubmitting}
+                      disabled={!canSubmit || noChange}
+                      type="submit"
+                    >
+                      Save
+                    </LoadingButton>
+                  </Field>
+                );
+              }}
             </form.Subscribe>
           </DialogFooter>
         </form>

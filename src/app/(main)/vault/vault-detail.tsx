@@ -16,17 +16,33 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { cn, formatDate } from '@/lib/utils';
 import { DecryptedVaultItem } from '@/types/vault-type';
-import { Calendar, CircleCheckBig, Copy, Eye, EyeOff, FileText, UserRound } from 'lucide-react';
+import {
+  Calendar,
+  CircleCheckBig,
+  Copy,
+  Edit2,
+  Eye,
+  EyeOff,
+  FileText,
+  UserRound,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
 interface VaultDetailProps extends React.ComponentProps<typeof Dialog> {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
   vault: DecryptedVaultItem | null;
+  onOpenChange: (open: boolean) => void;
+  onEdit: (vault: DecryptedVaultItem) => void;
 }
 
-export default function VaultDetail({ open, onOpenChange, vault, ...props }: VaultDetailProps) {
+export default function VaultDetail({
+  open,
+  vault,
+  onOpenChange,
+  onEdit,
+  ...props
+}: VaultDetailProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -206,6 +222,9 @@ export default function VaultDetail({ open, onOpenChange, vault, ...props }: Vau
           </div>
         </div>
         <DialogFooter>
+          <Button onClick={() => onEdit(vault)}>
+            <Edit2 /> Edit
+          </Button>
           <DialogClose asChild>
             <Button variant="outline">Close</Button>
           </DialogClose>

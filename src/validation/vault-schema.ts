@@ -22,7 +22,7 @@ export const accountDataSchema = z
       .optional()
       .or(z.literal('')),
 
-    notes: z.string().max(2000, 'Catatan maksimal 2000 karakter').optional(),
+    notes: z.string().trim().max(2000, 'Catatan maksimal 2000 karakter').optional(),
   })
   .superRefine((data, ctx) => {
     const hasIdentifier = Boolean(data.email || data.username || data.phone);
@@ -44,8 +44,9 @@ export const accountDataSchema = z
 export const noteDataSchema = z.object({
   content: z
     .string()
+    .trim()
     .max(10_000, 'Catatan maksimal 10.000 karakter')
-    .refine((val) => val.trim().length > 0, {
+    .refine((val) => val.length > 0, {
       error: 'Isi catatan tidak boleh kosong',
     }),
 });

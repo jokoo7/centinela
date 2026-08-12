@@ -1,7 +1,14 @@
 import { UserIcon } from 'lucide-react';
 import AccountClient from './account-client';
+import { getServerSession } from '@/lib/get-session';
+import { redirect } from 'next/navigation';
 
-export default function AccountPage() {
+export default async function AccountPage() {
+  const session = await getServerSession();
+  const user = session?.user;
+
+  if (!user) redirect('/login');
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">

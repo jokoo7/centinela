@@ -37,7 +37,7 @@ export const updateEncryptedVaultItem = async (
     pinned: boolean;
     type: 'ACCOUNT' | 'NOTE';
   },
-) => {
+): Promise<{ error: boolean }> => {
   try {
     const session = await getServerSession();
     if (!session) return { error: true };
@@ -48,6 +48,26 @@ export const updateEncryptedVaultItem = async (
     });
 
     if (result.count === 0) return { error: true };
+
+    revalidatePath('/vault');
+    return { error: false };
+  } catch {
+    return { error: true };
+  }
+};
+
+export const deleteVaultItem = async (id: string): Promise<{ error: boolean }> => {
+  try {
+    const session = await getServerSession();
+    if (!session?.user) return { error: true };
+
+    const result = await prisma.vaultItem.deleteMany({
+      where: { id, userId: session.user.id },
+    });
+
+    if (result.count === 0) {
+      return { error: true };
+    }
 
     revalidatePath('/vault');
     return { error: false };

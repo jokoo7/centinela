@@ -2,31 +2,27 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import VaultForm from './vault-form';
 import DeleteVault from './delete-vault';
 import { DecryptedVaultItem } from '@/types/vault-type';
-import { Dispatch, ForwardRefExoticComponent, RefAttributes, SetStateAction } from 'react';
-import { LucideProps, Pin } from 'lucide-react';
+import { ForwardRefExoticComponent, RefAttributes } from 'react';
+import { Edit2, LucideProps, Pin } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn, formatRelativeDate } from '@/lib/utils';
 
 interface VaultCardProps {
   vault: DecryptedVaultItem | null;
   Icon: ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>;
-  setVault: Dispatch<SetStateAction<DecryptedVaultItem | null>>;
-  setDetailOpen: Dispatch<SetStateAction<boolean>>;
+  onView: (vault: DecryptedVaultItem) => void;
+  onEdit: (vault: DecryptedVaultItem) => void;
 }
 
-export default function VaultCard({ vault, Icon, setVault, setDetailOpen }: VaultCardProps) {
+export default function VaultCard({ vault, Icon, onView, onEdit }: VaultCardProps) {
   if (!vault) return null;
 
   return (
     <Card
       className="group relative mx-auto flex w-full cursor-pointer flex-col justify-center rounded-lg border border-border/40 bg-card py-5 transition-all duration-200 hover:border-primary/50 hover:shadow-md"
-      onClick={() => {
-        setVault(vault);
-        setDetailOpen(true);
-      }}
+      onClick={() => onView(vault)}
     >
       <div className={cn(buttonVariants({ size: 'icon' }), 'absolute top-3 right-3')}>
         <Icon />
@@ -52,12 +48,15 @@ export default function VaultCard({ vault, Icon, setVault, setDetailOpen }: Vaul
         className="flex gap-2 group-hover:cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
-        <Button className="" variant={vault.pinned ? 'default' : 'outline'}>
+        <Button variant={vault.pinned ? 'default' : 'outline'}>
           <Pin />
           <span className="inline">{vault.pinned ? 'Pinned' : 'Pin'}</span>
         </Button>
-        <VaultForm existingItem={vault} itemId={vault.id} />
-        <DeleteVault />
+        <Button variant="secondary" size="icon" onClick={() => onEdit(vault)}>
+          <Edit2 />
+        </Button>
+        {/* <VaultForm existingItem={vault} itemId={vault.id} /> */}
+        <DeleteVault id={vault.id} />
       </CardFooter>
     </Card>
   );

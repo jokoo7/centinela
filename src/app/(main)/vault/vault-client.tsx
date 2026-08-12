@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import VaultForm from './vault-form';
-import { FileText, Pin, Search, UserRound, UserRoundKey, Vault } from 'lucide-react';
+import { FileText, Pin, Plus, Search, UserRound, UserRoundKey, Vault } from 'lucide-react';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { AccountData, NoteData, DecryptedVaultItem, VaultItemType } from '@/types/vault-type';
 import { useEffect, useMemo, useOptimistic, useState, useTransition } from 'react';
@@ -23,8 +23,14 @@ import UnlockVault from './unlock-vault';
 import { VaultItem as VaultItemRecord } from '@/lib/generated/prisma/client';
 import { decryptData } from '@/lib/crypto/encryption';
 import { User } from '@/lib/auth';
+import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group';
 
 type FilterType = VaultItemType | 'ALL';
+type ItemDialogState =
+  | { mode: 'closed' }
+  | { mode: 'view'; item: DecryptedVaultItem }
+  | { mode: 'create' }
+  | { mode: 'edit'; item: DecryptedVaultItem };
 
 export default function VaultClient({
   initialVaults,
@@ -42,6 +48,8 @@ export default function VaultClient({
   const [decryptedItems, setDecryptedItems] = useState<DecryptedVaultItem[] | null>(null);
   const [, startTransition] = useTransition();
   const router = useRouter();
+
+  const [dialogState, setDialogState] = useState<ItemDialogState>({ mode: 'closed' });
 
   useEffect(() => {
     if (!isUnlocked || !vaultKey) {
@@ -174,7 +182,14 @@ export default function VaultClient({
 
         {/* add vault form */}
         <div className="order-2 md:row-span-2">
-          <VaultForm />
+          {/* <VaultForm /> */}
+          <ButtonGroup>
+            <Button onClick={() => setDialogState({ mode: 'create' })}>Add New Vault</Button>
+            <ButtonGroupSeparator />
+            <Button size="icon" onClick={() => setDialogState({ mode: 'create' })}>
+              <Plus />
+            </Button>
+          </ButtonGroup>
         </div>
 
         {/* filter tab */}
@@ -205,9 +220,9 @@ export default function VaultClient({
                 <VaultCard
                   key={vault.id}
                   vault={vault}
-                  setVault={setSelectedVault}
-                  setDetailOpen={setDetailOpen}
                   Icon={Icon}
+                  onView={(item) => setDialogState({ mode: 'view', item })}
+                  onEdit={(item) => setDialogState({ mode: 'edit', item })}
                 />
               );
             })}
@@ -226,9 +241,9 @@ export default function VaultClient({
                 <VaultCard
                   key={vault.id}
                   vault={vault}
-                  setVault={setSelectedVault}
-                  setDetailOpen={setDetailOpen}
                   Icon={Icon}
+                  onView={(item) => setDialogState({ mode: 'view', item })}
+                  onEdit={(item) => setDialogState({ mode: 'edit', item })}
                 />
               );
             })}
@@ -246,7 +261,20 @@ export default function VaultClient({
         </div>
       )}
 
-      <VaultDetail open={detailOpen} onOpenChange={setDetailOpen} vault={selectedVault} />
+      {/* <VaultDetail open={detailOpen} onOpenChange={setDetailOpen} vault={selectedVault} /> */}
+      <VaultDetail
+        open={dialogState.mode === 'view'}
+        vault={dialogState.mode === 'view' ? dialogState.item : null}
+        onOpenChange={(open) => !open && setDialogState({ mode: 'closed' })}
+        onEdit={(item) => setDialogState({ mode: 'edit', item })}
+      />
+
+      <VaultForm
+        open={dialogState.mode === 'create' || dialogState.mode === 'edit'}
+        existingItem={dialogState.mode === 'edit' ? dialogState.item : undefined}
+        itemId={dialogState.mode === 'edit' ? dialogState.item.id : undefined}
+        onOpenChange={(open) => !open && setDialogState({ mode: 'closed' })}
+      />
     </>
   );
 }

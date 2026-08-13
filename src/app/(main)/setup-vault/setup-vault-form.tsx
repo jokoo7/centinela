@@ -2,12 +2,11 @@
 
 import { InputPassword } from '@/components/input-password';
 import LoadingButton from '@/components/loading-button';
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { User } from '@/lib/auth';
 import { cn } from '@/lib/utils';
 import { setupMasterPasswordSchema } from '@/validation/auth-schema';
 import { useForm } from '@tanstack/react-form';
-import Link from 'next/link';
 import React, { useState } from 'react';
 import { saveEncryptedVaultKey } from './action';
 import { useVaultKey } from '@/hooks/use-vault-key';
@@ -175,9 +174,6 @@ export default function SetupVaultForm({ user, className, ...props }: SetupVault
             </Field>
           )}
         </form.Subscribe>
-        <FieldDescription className="text-center">
-          Already have a vault? <Link href="/unlock">Unlock</Link>
-        </FieldDescription>
       </FieldGroup>
     </form>
   );

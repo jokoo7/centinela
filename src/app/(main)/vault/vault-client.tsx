@@ -24,6 +24,8 @@ import { VaultItem as VaultItemRecord } from '@/lib/generated/prisma/client';
 import { decryptData } from '@/lib/crypto/encryption';
 import { User } from '@/lib/auth';
 import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group';
+import { toast } from 'sonner';
+import { toggleVaultItemPin } from './action';
 
 type FilterType = VaultItemType | 'ALL';
 type ItemDialogState =
@@ -56,6 +58,8 @@ export default function VaultClient({
       return;
     }
 
+    console.log('useEffect RUN');
+
     let cancelled = false;
 
     Promise.all(
@@ -82,6 +86,8 @@ export default function VaultClient({
   );
 
   const { pinnedItems, otherItems, isEmpty } = useMemo(() => {
+    console.log('useMemo RUN');
+
     const query = search.trim().toLowerCase();
 
     const bySearch = query
@@ -93,7 +99,7 @@ export default function VaultClient({
               item.data.username?.toLowerCase().includes(query));
           return inTitle || inSubTitle;
         })
-      : (decryptedItems ?? []);
+      : optimisticItems;
 
     const filtered = filter === 'ALL' ? bySearch : bySearch.filter((item) => item.type === filter);
 
@@ -106,16 +112,25 @@ export default function VaultClient({
         .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()),
       isEmpty: filtered.length === 0,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [optimisticItems, filter, search]);
+  }, [search, optimisticItems, filter]);
 
   /** TODO: HANDLE TOGGLE PIN */
-  // function handleTogglePin(item: VaultItem) {
-  //   startTransition(async () => {
-  //     setOptimisticPin({ id: item.id, pinned: !item.pinned });
-  //     await action(item.id, !item.pinned);
-  //   });
-  // }
+  function handleTogglePin(item: DecryptedVaultItem) {
+    const newPinned = !item.pinned;
+
+    startTransition(async () => {
+      setOptimisticPin({ id: item.id, pinned: newPinned });
+
+      try {
+        await toggleVaultItemPin(item.id, newPinned);
+        setDecryptedItems((prev) =>
+          prev ? prev.map((i) => (i.id === item.id ? { ...i, pinned: newPinned } : i)) : prev,
+        );
+      } catch {
+        toast.error(newPinned ? 'Gagal menyematkan item' : 'Gagal melepas pin');
+      }
+    });
+  }
 
   const filterOptions: { lebel: string; value: FilterType }[] = [
     { lebel: 'All', value: 'ALL' },
@@ -221,6 +236,7 @@ export default function VaultClient({
                   Icon={Icon}
                   onView={(item) => setDialogState({ mode: 'view', item })}
                   onEdit={(item) => setDialogState({ mode: 'edit', item })}
+                  onTogglePin={handleTogglePin}
                 />
               );
             })}
@@ -242,6 +258,7 @@ export default function VaultClient({
                   Icon={Icon}
                   onView={(item) => setDialogState({ mode: 'view', item })}
                   onEdit={(item) => setDialogState({ mode: 'edit', item })}
+                  onTogglePin={handleTogglePin}
                 />
               );
             })}
@@ -259,7 +276,6 @@ export default function VaultClient({
         </div>
       )}
 
-      {/* <VaultDetail open={detailOpen} onOpenChange={setDetailOpen} vault={selectedVault} /> */}
       <VaultDetail
         open={dialogState.mode === 'view'}
         vault={dialogState.mode === 'view' ? dialogState.item : null}

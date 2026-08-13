@@ -14,9 +14,10 @@ interface VaultCardProps {
   Icon: ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>;
   onView: (vault: DecryptedVaultItem) => void;
   onEdit: (vault: DecryptedVaultItem) => void;
+  onTogglePin: (vault: DecryptedVaultItem) => void;
 }
 
-export default function VaultCard({ vault, Icon, onView, onEdit }: VaultCardProps) {
+export default function VaultCard({ vault, Icon, onView, onEdit, onTogglePin }: VaultCardProps) {
   if (!vault) return null;
 
   return (
@@ -48,14 +49,13 @@ export default function VaultCard({ vault, Icon, onView, onEdit }: VaultCardProp
         className="flex gap-2 group-hover:cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
-        <Button variant={vault.pinned ? 'default' : 'outline'}>
+        <Button variant={vault.pinned ? 'default' : 'outline'} onClick={() => onTogglePin(vault)}>
           <Pin />
           <span className="inline">{vault.pinned ? 'Pinned' : 'Pin'}</span>
         </Button>
         <Button variant="secondary" size="icon" onClick={() => onEdit(vault)}>
           <Edit2 />
         </Button>
-        {/* <VaultForm existingItem={vault} itemId={vault.id} /> */}
         <DeleteVault id={vault.id} />
       </CardFooter>
     </Card>

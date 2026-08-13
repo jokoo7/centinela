@@ -75,3 +75,18 @@ export const deleteVaultItem = async (id: string): Promise<{ error: boolean }> =
     return { error: true };
   }
 };
+
+export const toggleVaultItemPin = async (id: string, pinned: boolean) => {
+  const session = await getServerSession();
+  if (!session?.user) throw new Error('Unauthorized');
+
+  const result = await prisma.$executeRaw`
+    UPDATE "vault"
+    SET "pinned" = ${pinned}
+    WHERE "id" = ${id} AND "userId" = ${session.user.id}
+  `;
+
+  if (result === 0) {
+    throw new Error('Item not found');
+  }
+};

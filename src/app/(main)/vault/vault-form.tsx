@@ -9,15 +9,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Field, FieldGroup } from '@/components/ui/field';
-import { Edit2, Plus } from 'lucide-react';
 import LoadingButton from '@/components/loading-button';
 import { DecryptedVaultItem, VaultItemFormInput } from '@/types/vault-type';
 import { vaultItemFormSchema } from '@/validation/vault-schema';
 import { useEffect } from 'react';
-import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group';
 import { useAppForm } from '@/lib/form';
 import { encryptData } from '@/lib/crypto/encryption';
 import { useVaultKey } from '@/hooks/use-vault-key';
@@ -65,9 +62,6 @@ function toFormValues(item: DecryptedVaultItem): VaultItemFormInput {
   return { ...base, type: 'NOTE', data: { content: item.data.content } };
 }
 
-// type VaultFormProps =
-//   | { existingItem?: undefined; itemId?: undefined }
-//   | { existingItem: DecryptedVaultItem; itemId: string };
 interface VaultFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -145,21 +139,6 @@ export default function VaultForm({ open, onOpenChange, existingItem, itemId }: 
         if (!c) form.reset();
       }}
     >
-      {/* <DialogTrigger asChild>
-        {isEditMode ? (
-          <Button variant="secondary" size="icon">
-            <Edit2 />
-          </Button>
-        ) : (
-          <ButtonGroup>
-            <Button>Add New Vault</Button>
-            <ButtonGroupSeparator />
-            <Button size="icon">
-              <Plus />
-            </Button>
-          </ButtonGroup>
-        )}
-      </DialogTrigger> */}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit Vault' : 'Add New Vault'}</DialogTitle>

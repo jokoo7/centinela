@@ -41,9 +41,11 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
     },
     validators: {
       onChange: registerSchema,
+      onSubmit: registerSchema,
     },
     onSubmit: async ({ value }) => {
-      // await new Promise((resolve) => setTimeout(resolve, 3000));
+      setError(null);
+
       await authClient.signUp.email(
         {
           email: value.email,

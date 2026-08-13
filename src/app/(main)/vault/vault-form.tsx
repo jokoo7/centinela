@@ -73,7 +73,6 @@ export default function VaultForm({ open, onOpenChange, existingItem, itemId }: 
   const { vaultKey } = useVaultKey();
 
   const isEditMode = existingItem != undefined && itemId !== undefined;
-  // const existingAccountData = existingItem?.type === "ACCOUNT" ? existingItem.data : undefined
 
   function switchItemType(
     newType: VaultItemFormInput['type'],
@@ -87,9 +86,9 @@ export default function VaultForm({ open, onOpenChange, existingItem, itemId }: 
     defaultValues: existingItem ? toFormValues(existingItem) : defaultAccountValues(),
     validators: {
       onChange: vaultItemFormSchema,
+      onSubmit: vaultItemFormSchema,
     },
     onSubmit: async ({ value }) => {
-      // await new Promise((resolve) => setTimeout(resolve, 3000));
       const parsed = vaultItemFormSchema.parse(value);
 
       if (isEditMode) {
@@ -114,31 +113,28 @@ export default function VaultForm({ open, onOpenChange, existingItem, itemId }: 
           toast('Gagal menyimpan vault');
           return;
         }
+
         toast('Berhasil menyimpan vault');
         onOpenChange(false);
       } catch {
-        toast('Gagal membuat vault');
+        toast('Something went wrong');
       }
     },
   });
 
   useEffect(() => {
+    if (!open) return;
+
     if (existingItem) {
       form.reset(toFormValues(existingItem));
     } else {
       form.reset(defaultAccountValues());
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemId]);
+  }, [open, itemId]);
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(c) => {
-        onOpenChange(c);
-        if (!c) form.reset();
-      }}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'Edit Vault' : 'Add New Vault'}</DialogTitle>

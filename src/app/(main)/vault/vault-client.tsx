@@ -58,8 +58,6 @@ export default function VaultClient({
       return;
     }
 
-    console.log('useEffect RUN');
-
     let cancelled = false;
 
     Promise.all(
@@ -86,8 +84,6 @@ export default function VaultClient({
   );
 
   const { pinnedItems, otherItems, isEmpty } = useMemo(() => {
-    console.log('useMemo RUN');
-
     const query = search.trim().toLowerCase();
 
     const bySearch = query
@@ -195,11 +191,10 @@ export default function VaultClient({
 
         {/* add vault form */}
         <div className="order-2 md:row-span-2">
-          {/* <VaultForm /> */}
-          <ButtonGroup>
-            <Button onClick={() => setDialogState({ mode: 'create' })}>Add New Vault</Button>
+          <ButtonGroup onClick={() => setDialogState({ mode: 'create' })}>
+            <Button>Add New Vault</Button>
             <ButtonGroupSeparator />
-            <Button size="icon" onClick={() => setDialogState({ mode: 'create' })}>
+            <Button size="icon">
               <Plus />
             </Button>
           </ButtonGroup>
@@ -284,6 +279,7 @@ export default function VaultClient({
       />
 
       <VaultForm
+        key={dialogState.mode === 'edit' ? `edit-${dialogState.item.id}` : 'create'}
         open={dialogState.mode === 'create' || dialogState.mode === 'edit'}
         existingItem={dialogState.mode === 'edit' ? dialogState.item : undefined}
         itemId={dialogState.mode === 'edit' ? dialogState.item.id : undefined}

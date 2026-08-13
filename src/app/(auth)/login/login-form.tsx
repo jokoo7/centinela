@@ -7,10 +7,16 @@ import { authClient } from '@/lib/auth-client';
 import { useAppForm } from '@/lib/form';
 import { cn } from '@/lib/utils';
 import { loginSchema } from '@/validation/auth-schema';
+import { ErrorContext } from 'better-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import * as z from 'zod';
+
+export function isEmail(value: string): boolean {
+  return z.email().safeParse(value).success;
+}
 
 export default function LoginForm({ className, ...props }: React.ComponentProps<'form'>) {
   const [error, setError] = useState<string | null>(null);
@@ -18,30 +24,39 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
 
   const form = useAppForm({
     defaultValues: {
-      username: '',
+      identifier: '',
       password: '',
     },
     validators: {
+      onSubmit: loginSchema,
       onChange: loginSchema,
     },
     onSubmit: async ({ value }) => {
-      // await new Promise((resolve) => setTimeout(resolve, 3000));
-      await authClient.signIn.username(
-        {
-          username: value.username,
-          password: value.password,
-          rememberMe: false,
+      setError(null);
+      const { identifier, password } = value;
+
+      const callbacks = {
+        onSuccess: () => {
+          toast('Login successfully');
+          router.push('/vault');
         },
-        {
-          onSuccess: () => {
-            toast('Login successfully');
-            router.push('/vault');
-          },
-          onError: (ctx) => {
-            setError(ctx.error.message || 'Something went wrong');
-          },
+        onError: (ctx: ErrorContext) => {
+          console.log(ctx);
+          setError(ctx.error.message || 'Something went wrong');
         },
-      );
+      };
+
+      if (isEmail(identifier)) {
+        await authClient.signIn.email(
+          { email: identifier, password, rememberMe: false },
+          callbacks,
+        );
+      } else {
+        await authClient.signIn.username(
+          { username: identifier, password, rememberMe: false },
+          callbacks,
+        );
+      }
     },
   });
 
@@ -61,8 +76,10 @@ export default function LoginForm({ className, ...props }: React.ComponentProps<
       <FieldGroup>
         {error && <FieldError>{error}</FieldError>}
 
-        <form.AppField name="username">
-          {(field) => <field.TextField label="Username" placeholder="Enter your username" />}
+        <form.AppField name="identifier">
+          {(field) => (
+            <field.TextField label="Email or Username" placeholder="Enter your email/username" />
+          )}
         </form.AppField>
 
         <form.AppField name="password">

@@ -23,7 +23,7 @@ export const masterPasswordSchema = z
   .regex(/^[^-]*$/, 'Master password tidak boleh mengandung -');
 
 export const loginSchema = z.object({
-  username: usernameSchema,
+  identifier: z.string().trim().min(1, 'Email atau username wajib diisi'),
   password: passwordSchema,
 });
 

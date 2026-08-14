@@ -1,7 +1,7 @@
 import { UserIcon } from 'lucide-react';
-import AccountClient from './account-client';
 import { getServerSession } from '@/lib/get-session';
 import { redirect } from 'next/navigation';
+import SettingsClient from './settings-client';
 
 export default async function AccountPage() {
   const session = await getServerSession();
@@ -19,7 +19,7 @@ export default async function AccountPage() {
         <p className="text-muted-foreground">Welcome back! Here&apos;s your account overview.</p>
       </div>
 
-      <AccountClient />
+      <SettingsClient user={user} />
     </div>
   );
 }

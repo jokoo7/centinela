@@ -53,7 +53,6 @@ export default function VaultClient({
 
   useEffect(() => {
     if (!isUnlocked || !vaultKey) {
-      // avoid synchronous state update inside effect to prevent cascading renders
       startTransition(() => setDecryptedItems(null));
       return;
     }

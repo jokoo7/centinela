@@ -5,26 +5,12 @@ import { Field, FieldDescription, FieldError, FieldGroup } from '@/components/ui
 import { useUsernameAvailability } from '@/hooks/use-username-availability';
 import { authClient } from '@/lib/auth-client';
 import { useAppForm } from '@/lib/form';
-import { cn } from '@/lib/utils';
+import { cn, slugifyUsername } from '@/lib/utils';
 import { registerSchema } from '@/validation/auth-schema';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
-
-function slugifyUsername(name: string, maxLength = 12) {
-  const slug = name
-    .toLowerCase()
-    .trim()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // hilangkan aksen
-    .replace(/[^a-z0-9\s_]/g, '') // buang karakter di luar huruf kecil/angka/spasi/underscore
-    .replace(/\s+/g, '_') // spasi -> underscore
-    .replace(/_+/g, '_') // underscore ganda -> satu
-    .replace(/^_|_$/g, ''); // buang underscore di awal/akhir
-
-  return slug.slice(0, maxLength).replace(/_$/, ''); // potong ke maxLength, buang trailing _ sisa potongan
-}
 
 export default function RegisterForm({ className, ...props }: React.ComponentProps<'form'>) {
   const [error, setError] = useState<string | null>(null);

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +24,11 @@ export default function EmailForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-semibold">Change Email</CardTitle>
+        <CardTitle className="font-semibold">Email Address</CardTitle>
+        <CardDescription>
+          Manage the email address associated with your account. Changing your email requires
+          verification.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form

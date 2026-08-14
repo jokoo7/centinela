@@ -1,11 +1,16 @@
 import { authClient } from '@/lib/auth-client';
+import { usernameSchema } from '@/validation/auth-schema';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface UseUsernameAvailabilityOptions {
   debounceMs?: number;
+  originalUsername?: string;
 }
 
-export function useUsernameAvailability({ debounceMs = 400 }: UseUsernameAvailabilityOptions = {}) {
+export function useUsernameAvailability({
+  debounceMs = 400,
+  originalUsername,
+}: UseUsernameAvailabilityOptions = {}) {
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
   const [checkError, setCheckError] = useState<string | null>(null);
@@ -19,8 +24,26 @@ export function useUsernameAvailability({ debounceMs = 400 }: UseUsernameAvailab
 
       const myRequestId = ++requestIdRef.current;
 
-      if (!value) {
+      const result = usernameSchema.safeParse(value);
+
+      if (!result.success) {
         setAvailable(null);
+        setCheckError(null);
+        setChecking(false);
+        return;
+      }
+
+      const parsed = result.data;
+
+      if (!parsed) {
+        setAvailable(null);
+        setCheckError(null);
+        setChecking(false);
+        return;
+      }
+
+      if (originalUsername && parsed === originalUsername) {
+        setAvailable(true);
         setCheckError(null);
         setChecking(false);
         return;
@@ -32,7 +55,7 @@ export function useUsernameAvailability({ debounceMs = 400 }: UseUsernameAvailab
       debounceRef.current = setTimeout(async () => {
         setChecking(true);
         try {
-          const res = await authClient.isUsernameAvailable({ username: value });
+          const res = await authClient.isUsernameAvailable({ username: parsed });
           if (myRequestId !== requestIdRef.current) return;
           setAvailable(res.data?.available ?? null);
         } catch {
@@ -44,7 +67,7 @@ export function useUsernameAvailability({ debounceMs = 400 }: UseUsernameAvailab
         }
       }, debounceMs);
     },
-    [debounceMs],
+    [debounceMs, originalUsername],
   );
 
   const reset = useCallback(() => {

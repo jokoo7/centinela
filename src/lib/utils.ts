@@ -43,3 +43,17 @@ export function formatRelativeDate(
 
   return formatDistanceToNow(parsedDate, { addSuffix: true, locale: id });
 }
+
+export function slugifyUsername(name: string, maxLength = 12) {
+  const slug = name
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // hilangkan aksen
+    .replace(/[^a-z0-9\s_]/g, '') // buang karakter di luar huruf kecil/angka/spasi/underscore
+    .replace(/\s+/g, '_') // spasi -> underscore
+    .replace(/_+/g, '_') // underscore ganda -> satu
+    .replace(/^_|_$/g, ''); // buang underscore di awal/akhir
+
+  return slug.slice(0, maxLength).replace(/_$/, ''); // potong ke maxLength, buang trailing _ sisa potongan
+}

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Field, FieldDescription, FieldError, FieldGroup } from '@/components/ui/field';
+import { Field, FieldError, FieldGroup } from '@/components/ui/field';
 import LoadingButton from '@/components/loading-button';
 import { withEmailSchema } from '@/validation/auth-schema';
 import { useAppForm } from '@/lib/form';
@@ -16,6 +16,7 @@ export default function EmailForm({ currentEmail }: { currentEmail: string }) {
     },
     validators: {
       onChange: withEmailSchema,
+      onSubmit: withEmailSchema,
     },
     onSubmit: async ({ value }) => {
       setError(null);

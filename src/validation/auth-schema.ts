@@ -17,10 +17,6 @@ export const passwordSchema = z
   .min(8, 'Password minimal 8 karakter.')
   .regex(/[A-Z]/, 'Password harus mengandung minimal 1 huruf kapital')
   .regex(/[0-9]/, 'Password harus mengandung minimal 1 angka');
-export const masterPasswordSchema = z
-  .string()
-  .min(8, 'Master password minimal 8 karakter')
-  .regex(/^[^-]*$/, 'Master password tidak boleh mengandung -');
 
 export const loginSchema = z.object({
   identifier: z.string().trim().min(1, 'Email atau username wajib diisi'),
@@ -34,23 +30,14 @@ export const registerSchema = z.object({
   password: passwordSchema,
 });
 
-export const setupMasterPasswordSchema = z
-  .object({
-    masterPassword: masterPasswordSchema,
-    confirmMasterPassword: z.string().min(1, 'Konfirmasi password wajib diisi'),
-  })
-  .refine((data) => data.masterPassword === data.confirmMasterPassword, {
-    error: 'Konfirmasi password tidak cocok',
-    path: ['confirmMasterPassword'],
-  });
-
-export const unlockVaultSchema = z.object({
-  masterPassword: masterPasswordSchema,
-});
-
 export const updateProfileDetailSchema = z.object({
   name: nameSchema,
   username: usernameSchema,
+});
+
+export const updatePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Masukkan password akun ini sekarang'),
+  newPassword: passwordSchema,
 });
 
 export const withEmailSchema = z.object({

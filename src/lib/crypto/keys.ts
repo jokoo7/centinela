@@ -81,7 +81,7 @@ export async function unwrapVaultKey(
     masterKey,
     { name: 'AES-GCM', iv: base64ToBuffer(ivBase64) },
     { name: 'AES-GCM', length: AES_KEY_LENGTH },
-    false, // vaultKey tetap tidak bisa diekspor
+    true,
     ['encrypt', 'decrypt'],
   );
 }

@@ -12,7 +12,7 @@ import {
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { useVaultKey } from '@/hooks/use-vault-key';
 import { User } from '@/lib/auth';
-import { unlockVaultSchema } from '@/validation/auth-schema';
+import { unlockVaultSchema } from '@/validation/vault-schema';
 import { useForm } from '@tanstack/react-form';
 import { useState } from 'react';
 import { toast } from 'sonner';

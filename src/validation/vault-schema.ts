@@ -4,6 +4,11 @@ import * as z from 'zod';
 const phonePattern = /^[0-9+()\- ]+$/;
 const pinPattern = /^\d{4,12}$/;
 
+export const masterPasswordSchema = z
+  .string()
+  .min(8, 'Master password minimal 8 karakter')
+  .regex(/^[^-]*$/, 'Master password tidak boleh mengandung -');
+
 export const accountDataSchema = z
   .object({
     email: z.string().trim().pipe(z.email('Format email tidak valid')).optional().or(z.literal('')),
@@ -67,6 +72,25 @@ export const vaultItemFormSchema = z.discriminatedUnion('type', [
     data: noteDataSchema,
   }),
 ]);
+
+export const setupMasterPasswordSchema = z
+  .object({
+    masterPassword: masterPasswordSchema,
+    confirmMasterPassword: z.string().min(1, 'Konfirmasi password wajib diisi'),
+  })
+  .refine((data) => data.masterPassword === data.confirmMasterPassword, {
+    error: 'Konfirmasi password tidak cocok',
+    path: ['confirmMasterPassword'],
+  });
+
+export const unlockVaultSchema = z.object({
+  masterPassword: masterPasswordSchema,
+});
+
+export const updateMasterPasswordSchema = z.object({
+  currentMasterPassword: z.string().min(1, 'Masuukan master password anda saat ini'),
+  newMasterPassword: masterPasswordSchema,
+});
 
 type _SchemaMatchesType =
   z.infer<typeof vaultItemFormSchema> extends VaultItemFormInput

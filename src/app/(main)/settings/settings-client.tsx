@@ -26,7 +26,7 @@ export default function SettingsClient({ user }: { user: User }) {
       <TabsContent value="security">
         <div className="mt-4 space-y-4">
           <PasswordForm />
-          <MasterPasswordForm />
+          <MasterPasswordForm user={user} />
           <ResetMasterPassword />
           <Card className="ring-destructive/50">
             <CardHeader>

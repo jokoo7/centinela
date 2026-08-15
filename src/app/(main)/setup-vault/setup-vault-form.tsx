@@ -5,13 +5,13 @@ import LoadingButton from '@/components/loading-button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { User } from '@/lib/auth';
 import { cn } from '@/lib/utils';
-import { setupMasterPasswordSchema } from '@/validation/auth-schema';
 import { useForm } from '@tanstack/react-form';
 import React, { useState } from 'react';
 import { saveEncryptedVaultKey } from './action';
 import { useVaultKey } from '@/hooks/use-vault-key';
 import { useRouter } from 'next/navigation';
 import { setupMasterPassword } from '@/lib/crypto/setup';
+import { setupMasterPasswordSchema } from '@/validation/vault-schema';
 
 interface SetupVaultFormProps extends React.ComponentProps<'form'> {
   user: User;

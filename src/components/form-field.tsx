@@ -30,6 +30,7 @@ export function TextField({
   variant = 'default',
   dataVariantGroup,
   description,
+  others,
   ...inputProps
 }: {
   label: string;
@@ -37,6 +38,7 @@ export function TextField({
   variant?: 'default' | 'group';
   dataVariantGroup?: UsernameCheckState;
   description?: React.ReactNode;
+  others?: React.ReactNode;
 } & React.ComponentProps<typeof Input>) {
   const field = useFieldContext<string>();
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -81,6 +83,7 @@ export function TextField({
         </InputGroup>
       )}
       {description && <FieldDescription>{description}</FieldDescription>}
+      {others}
       {isInvalid && <FieldError errors={field.state.meta.errors} />}
       {!checking && available === true && (
         <FieldDescription className="text-green-800">Username is available</FieldDescription>

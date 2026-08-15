@@ -37,7 +37,7 @@ interface VaultKeyContextValue {
     vaultSalt: string,
     encryptedVaultKey: string,
     encryptedVaultKeyIv: string,
-  ) => Promise<void>;
+  ) => Promise<CryptoKey>;
 
   /**
    * Digunakan ketika Vault Key sudah tersedia.
@@ -83,23 +83,20 @@ export function VaultKeyProvider({ children }: { children: ReactNode }) {
       vaultSalt: string,
       encryptedVaultKey: string,
       encryptedVaultKeyIv: string,
-    ) => {
-      // Abaikan jika masih ada proses unlock sebelumnya.
-      if (unlockingRef.current) return;
+    ): Promise<CryptoKey> => {
+      if (unlockingRef.current) {
+        throw new Error('Unlock already in progress');
+      }
 
       unlockingRef.current = true;
 
       try {
-        // Ubah Master Password menjadi Master Key.
         const masterKey = await deriveMasterKey(masterPassword, vaultSalt);
-
-        // Gunakan Master Key untuk membuka Vault Key.
         const key = await unwrapVaultKey(encryptedVaultKey, encryptedVaultKeyIv, masterKey);
 
-        // Simpan Vault Key ke Context.
         setVaultKey(key);
+        return key;
       } finally {
-        // Tandai bahwa proses unlock sudah selesai.
         unlockingRef.current = false;
       }
     },

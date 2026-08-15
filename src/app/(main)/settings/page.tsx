@@ -9,8 +9,6 @@ export default async function AccountPage() {
 
   if (!user) redirect('/login');
 
-  // console.log(user);
-
   return (
     <div className="space-y-6">
       <div className="space-y-2">

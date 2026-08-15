@@ -20,7 +20,7 @@ export default function SettingsClient({ user }: { user: User }) {
       <TabsContent value="general">
         <div className="mt-4 space-y-4">
           <BasicInformationForm user={user} />
-          <EmailForm />
+          <EmailForm currentEmail={user.email} />
         </div>
       </TabsContent>
       <TabsContent value="security">

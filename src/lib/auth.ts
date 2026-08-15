@@ -5,15 +5,21 @@ import { username } from 'better-auth/plugins';
 import { generateSalt } from './crypto/encoding';
 import { nextCookies } from 'better-auth/next-js';
 import { sendEmail } from './email';
+import { createAuthMiddleware, getSessionFromCtx } from 'better-auth/api';
+
+const pendingEmailChanges = new Map();
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'postgresql',
   }),
+
   emailAndPassword: {
     enabled: true,
+    autoSignIn: true,
+    requireEmailVerification: true,
     resetPasswordTokenExpiresIn: 900, // 15 menit
-    revokeSessionsOnPasswordReset: true, // logout semua device lain setelah reset berhasil
+    revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
       try {
         await sendEmail({
@@ -26,25 +32,61 @@ export const auth = betterAuth({
       }
     },
   },
+
   user: {
+    changeEmail: {
+      enabled: true,
+      updateEmailWithoutVerification: false,
+    },
     additionalFields: {
-      vaultSalt: {
-        type: 'string',
-        required: false,
-        input: false,
-      },
-      encryptedVaultKey: {
-        type: 'string',
-        required: false,
-        input: false,
-      },
-      encryptedVaultKeyIv: {
-        type: 'string',
-        required: false,
-        input: false,
-      },
+      vaultSalt: { type: 'string', required: false, input: false },
+      encryptedVaultKey: { type: 'string', required: false, input: false },
+      encryptedVaultKeyIv: { type: 'string', required: false, input: false },
     },
   },
+
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+
+    async sendVerificationEmail({ user, url }, request) {
+      const isChangeEmail = request?.url?.includes('/change-email');
+
+      const content = isChangeEmail
+        ? {
+            subject: 'Confirm your new email',
+            text: `Click the link to confirm this email: ${url}`,
+          }
+        : {
+            subject: 'Verify your email',
+            text: `Welcome! Click the link to verify your email and get started: ${url}`,
+          };
+
+      try {
+        await sendEmail({ to: user.email, ...content });
+      } catch (err) {
+        console.error(
+          `Failed to send ${isChangeEmail ? 'change-email confirmation' : 'signup verification'} email:`,
+          err,
+        );
+      }
+    },
+  },
+
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === '/change-email') {
+        const session = await getSessionFromCtx(ctx);
+        const userId = session?.user?.id;
+        const oldEmail = session?.user?.email;
+
+        if (userId && oldEmail) {
+          pendingEmailChanges.set(userId, oldEmail);
+        }
+      }
+    }),
+  },
+
   databaseHooks: {
     user: {
       create: {
@@ -57,8 +99,32 @@ export const auth = betterAuth({
           };
         },
       },
+      update: {
+        async after(user) {
+          const oldEmail = pendingEmailChanges.get(user.id);
+          if (oldEmail && oldEmail !== user.email) {
+            pendingEmailChanges.delete(user.id);
+
+            // Notifikasi ke email lama — fire-and-forget, gak kritis
+            sendEmail({
+              to: oldEmail,
+              subject: 'Your account email was changed',
+              text: `Your account email was changed to ${user.email}. If this wasn't you, please secure your account immediately.`,
+            }).catch((err) => console.error('Failed to send email-change notice:', err));
+
+            try {
+              await prisma.session.deleteMany({
+                where: { userId: user.id },
+              });
+            } catch (err) {
+              console.error('Failed to revoke sessions:', err);
+            }
+          }
+        },
+      },
     },
   },
+
   plugins: [
     username({
       minUsernameLength: 1,

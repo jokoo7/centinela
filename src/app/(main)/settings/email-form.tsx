@@ -1,23 +1,39 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { BadgeCheck, BadgeX } from 'lucide-react';
-import { useForm } from '@tanstack/react-form';
+import { Field, FieldDescription, FieldError, FieldGroup } from '@/components/ui/field';
 import LoadingButton from '@/components/loading-button';
 import { withEmailSchema } from '@/validation/auth-schema';
+import { useAppForm } from '@/lib/form';
+import { useState } from 'react';
+import { authClient } from '@/lib/auth-client';
 
-export default function EmailForm() {
-  const form = useForm({
+export default function EmailForm({ currentEmail }: { currentEmail: string }) {
+  const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
+
+  const form = useAppForm({
     defaultValues: {
-      email: '',
+      email: currentEmail,
     },
     validators: {
       onChange: withEmailSchema,
     },
     onSubmit: async ({ value }) => {
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      console.log(value);
+      setError(null);
+
+      await authClient.changeEmail(
+        {
+          newEmail: value.email,
+          callbackURL: '/settings',
+        },
+        {
+          onSuccess: () => {
+            setStatus('Verification email sent to your current address');
+          },
+          onError: (ctx) => {
+            setError(ctx.error.message || 'Failed to initiate email change');
+          },
+        },
+      );
     },
   });
 
@@ -39,42 +55,21 @@ export default function EmailForm() {
           }}
         >
           <FieldGroup>
-            <form.Field name="email">
-              {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid} className="text-start">
-                    <FieldLabel htmlFor={field.name}>
-                      Email{' '}
-                      <Badge className="ml-auto bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-                        <BadgeCheck data-icon="inline-start" />
-                        Verified
-                      </Badge>
-                      <Badge className="bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300">
-                        <BadgeX data-icon="inline-start" />
-                        Unverified
-                      </Badge>
-                    </FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder="your@gmail.com"
-                      autoComplete="email"
-                    />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                );
-              }}
-            </form.Field>
+            {error && <FieldError>{error}</FieldError>}
+
+            <form.AppField name="email">
+              {(field) => (
+                <field.TextField label="Email" type="email" placeholder="your@gmail.com" />
+              )}
+            </form.AppField>
+
+            {status && <p className="text-sm text-green-600">{status}</p>}
 
             <form.Subscribe selector={(state) => [state.isSubmitting, state.canSubmit] as const}>
               {([isSubmitting, canSubmit]) => (
                 <Field orientation="horizontal">
                   <LoadingButton loading={isSubmitting} disabled={!canSubmit} type="submit">
-                    Save Change
+                    Save change
                   </LoadingButton>
                 </Field>
               )}

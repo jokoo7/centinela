@@ -38,11 +38,12 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
           name: value.name,
           username: value.username,
           password: value.password,
+          callbackURL: '/vault',
         },
         {
           onSuccess: () => {
             toast('Register successfully');
-            router.push('/vault');
+            router.push('/verify-email');
           },
           onError: (ctx) => {
             setError(ctx.error.message || 'Something went wrong');

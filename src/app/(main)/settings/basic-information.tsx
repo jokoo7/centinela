@@ -1,3 +1,5 @@
+'use client';
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldError, FieldGroup } from '@/components/ui/field';
 import { updateProfileDetailSchema } from '@/validation/auth-schema';

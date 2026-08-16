@@ -31,12 +31,38 @@ export const auth = betterAuth({
         console.error('Failed to send reset password email:', err);
       }
     },
+    onExistingUserSignUp: async ({ user }) => {
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: 'Sign-up attempt with your email',
+          text: 'Someone tried to create an account using your email address. If this was you, try signing in instead. If not, you can safely ignore this email.',
+        });
+      } catch (err) {
+        console.error('Failed to send reset password email:', err);
+      }
+    },
   },
 
   user: {
     changeEmail: {
       enabled: true,
       updateEmailWithoutVerification: false,
+    },
+    deleteUser: {
+      enabled: true,
+
+      sendDeleteAccountVerification: async ({ user, url }) => {
+        await sendEmail({
+          to: user.email,
+          subject: 'Konfirmasi hapus akun Centinela',
+          text: `Kamu meminta untuk menghapus akun Centinela dan seluruh isi vault-mu secara permanen. Klik link ini untuk konfirmasi: ${url}\n\nKalau ini bukan kamu, abaikan email ini dan segera ganti password akunmu.`,
+        });
+      },
+
+      beforeDelete: async (user) => {
+        await prisma.vaultItem.deleteMany({ where: { userId: user.id } });
+      },
     },
     additionalFields: {
       vaultSalt: { type: 'string', required: false, input: false },

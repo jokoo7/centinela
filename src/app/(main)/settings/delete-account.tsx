@@ -1,7 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import LoadingButton from '@/components/loading-button';
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -13,7 +12,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { RotateCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Field,
   FieldContent,
@@ -21,75 +22,87 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useState, useTransition } from 'react';
-import LoadingButton from '@/components/loading-button';
-import { resetMasterPassword } from './action';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 import { useVaultKey } from '@/hooks/use-vault-key';
+import { authClient } from '@/lib/auth-client';
+import { Trash2 } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { toast } from 'sonner';
 
-export default function ResetMasterPassword() {
-  const [checked, setChecked] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const router = useRouter();
+export default function DeleteAccount() {
   const { lock } = useVaultKey();
+  const [checked, setChecked] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  function handleResetMasterPassword() {
+  function handleDeleteAccount() {
     startTransition(async () => {
-      const { error, success } = await resetMasterPassword();
+      const { error } = await authClient.deleteUser({
+        callbackURL: '/goodbye',
+      });
 
-      if (!success) {
-        toast(error ?? 'Something went wrong.');
+      if (error) {
+        toast(error.message ?? 'Gagal mengirim email konfirmasi.');
         return;
       }
 
       lock();
-      toast('Success delete master password.');
-      router.push('/setup-vault');
+      toast('Cek your email forn confirmation delete account');
+      setSent(true);
     });
+  }
+
+  if (sent) {
+    return (
+      <Card className="ring-destructive/50">
+        <CardHeader>
+          <CardTitle>Cek email kamu</CardTitle>
+          <CardDescription>
+            Kami sudah kirim link konfirmasi ke email kamu. Klik link tersebut untuk menyelesaikan
+            penghapusan akun.
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    );
   }
 
   return (
     <Card className="ring-destructive/50">
       <CardHeader>
-        <CardTitle className="font-semibold text-destructive">Reset Master Password</CardTitle>
+        <CardTitle className="font-semibold text-destructive">Delete Account</CardTitle>
         <CardDescription>
-          Forgot your master password? Since we never store it, there&apos;s no way to recover your
-          vault key. Resetting will permanently delete all items in your vault.
+          Permanently delete your account and everything in your vault. This cannot be undone.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" type="submit" className="max-w-fit border-destructive">
-              Reset master password
+            <Button variant="destructive" type="button" className="max-w-fit border-destructive">
+              Delete account
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent size="sm">
             <AlertDialogHeader>
               <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
-                <RotateCcw />
+                <Trash2 />
               </AlertDialogMedia>
-              <AlertDialogTitle>Reset master passowrd?</AlertDialogTitle>
+              <AlertDialogTitle>Delete your account?</AlertDialogTitle>
               <AlertDialogDescription>
-                Since we never store it, there&apos;s no way to recover your vault key. Resetting
-                will permanently delete all items in your vault.
+                We&apos;ll send a confirmation link to your email. Once confirmed, your account and
+                all vault items will be permanently deleted.
               </AlertDialogDescription>
               <FieldGroup className="mt-2">
                 <Field orientation="horizontal">
                   <Checkbox
-                    id="terms-checkbox-desc"
-                    name="terms-checkbox-desc"
+                    id="delete-account-confirm"
                     onCheckedChange={(value) => setChecked(value === true)}
                     checked={checked}
                   />
                   <FieldContent>
-                    <FieldLabel htmlFor="terms-checkbox-desc">
-                      Accept terms and conditions
+                    <FieldLabel htmlFor="delete-account-confirm">
+                      I understand this is permanent
                     </FieldLabel>
                     <FieldDescription>
-                      By clicking this checkbox, you agree to the terms and conditions.
+                      All vault items and account data will be lost forever.
                     </FieldDescription>
                   </FieldContent>
                 </Field>
@@ -100,10 +113,10 @@ export default function ResetMasterPassword() {
               <LoadingButton
                 variant="destructive"
                 loading={isPending}
-                disabled={!checked}
-                onClick={handleResetMasterPassword}
+                disabled={!checked || isPending}
+                onClick={handleDeleteAccount}
               >
-                Reset
+                Send confirmation
               </LoadingButton>
             </AlertDialogFooter>
           </AlertDialogContent>

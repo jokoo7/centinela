@@ -45,7 +45,7 @@ export default function ResetMasterPassword() {
       }
 
       lock();
-      toast('Success delete master password.');
+      toast('Master password deleted successfully.');
       router.push('/setup-vault');
     });
   }

@@ -41,7 +41,7 @@ export default function BasicInformationForm({ user }: { user: User }) {
       });
 
       if (isEqual(parsed, originalValues)) {
-        toast('Tidak ada perubahan untuk disimpan');
+        toast('No changes to save');
         return;
       }
 

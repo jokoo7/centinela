@@ -35,7 +35,7 @@ export default function ResetPasswordForm({ token }: { token: string }) {
           onError: (ctx) => {
             const message =
               ctx.error.code === 'INVALID_TOKEN'
-                ? 'Link reset password sudah kedaluwarsa. Silakan minta link baru.'
+                ? 'The password reset link has expired. Please request a new one.'
                 : ctx.error.message || 'Something went wrong';
             setError(message);
           },

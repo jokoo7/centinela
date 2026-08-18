@@ -94,7 +94,7 @@ export default function VaultForm({ open, onOpenChange, existingItem, itemId }: 
       if (isEditMode) {
         const originalValues = vaultItemFormSchema.parse(toFormValues(existingItem));
         if (isEqual(parsed, originalValues)) {
-          toast('Tidak ada perubahan untuk disimpan');
+          toast('No changes to save');
           onOpenChange(false);
           return;
         }
@@ -110,11 +110,11 @@ export default function VaultForm({ open, onOpenChange, existingItem, itemId }: 
           : await createEncryptedVaultItem(payload);
 
         if (error) {
-          toast('Gagal menyimpan vault');
+          toast('Failed to save vault');
           return;
         }
 
-        toast('Berhasil menyimpan vault');
+        toast('Vault saved successfully');
         onOpenChange(false);
       } catch {
         toast('Something went wrong');
@@ -194,7 +194,7 @@ export default function VaultForm({ open, onOpenChange, existingItem, itemId }: 
                   type === 'ACCOUNT' ? (
                     <div className="flex flex-col gap-4 rounded-lg border border-neutral-200 p-4 dark:border-neutral-800">
                       <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                        Minimal isi salah satu identifier (email/username/telepon) dan salah satu
+                        Please provide at least one identifier (email/username/phone) and one
                         credential (password/PIN).
                       </p>
 
@@ -240,7 +240,6 @@ export default function VaultForm({ open, onOpenChange, existingItem, itemId }: 
                         </form.AppField>
                       </div>
 
-                      {/* --- Credentials: field tetap, semua opsional --- */}
                       <div className="mb-4 flex flex-col gap-3">
                         <span className="text-base font-medium">Credentials</span>
 

@@ -42,7 +42,6 @@ export default function SetupVaultForm({ user, className, ...props }: SetupVault
       onSubmit: setupMasterPasswordSchema,
     },
     onSubmit: async ({ value }) => {
-      // await new Promise((resolve) => setTimeout(resolve, 2000));
       setError(null);
 
       try {
@@ -62,10 +61,10 @@ export default function SetupVaultForm({ user, className, ...props }: SetupVault
           setError(null);
           router.push('/vault');
         } else {
-          setError('Gagal Setup Master Password');
+          setError('Failed to set up the master password.');
         }
       } catch {
-        setError('Gagal Setup Master Password');
+        setError('Failed to set up the master password.');
       }
     },
   });

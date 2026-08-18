@@ -3,23 +3,26 @@ import * as z from 'zod';
 export const usernameSchema = z
   .string()
   .trim()
-  .min(1, 'Username tidak boleh kosong')
-  .max(12, { message: 'Username maksimal 12 karakter' })
-  .regex(/^\S+$/, { message: 'Username tidak boleh mengandung spasi' })
+  .min(1, 'Username cannot be empty')
+  .max(12, { message: 'Username must be at most 12 characters' })
+  .regex(/^\S+$/, { message: 'Username cannot contain spaces' })
   .regex(/^[a-z0-9_]+$/, {
-    message: 'Username hanya boleh berisi huruf kecil, angka, dan underscore (_)',
+    message: 'Username can only contain lowercase letters, numbers, and underscores (_)',
   });
-export const emailSchema = z.string().trim().pipe(z.email('Format email tidak valid'));
-export const nameSchema = z.string().trim().min(1, 'Nama tidak boleh kosong');
+
+export const emailSchema = z.string().trim().pipe(z.email('Invalid email format'));
+
+export const nameSchema = z.string().trim().min(1, 'Name cannot be empty');
+
 export const passwordSchema = z
   .string()
-  .min(1, 'Password wajib diisi.')
-  .min(8, 'Password minimal 8 karakter.')
-  .regex(/[A-Z]/, 'Password harus mengandung minimal 1 huruf kapital')
-  .regex(/[0-9]/, 'Password harus mengandung minimal 1 angka');
+  .min(1, 'Password is required.')
+  .min(8, 'Password must be at least 8 characters.')
+  .regex(/[A-Z]/, 'Password must contain at least 1 uppercase letter')
+  .regex(/[0-9]/, 'Password must contain at least 1 number');
 
 export const loginSchema = z.object({
-  identifier: z.string().trim().min(1, 'Email atau username wajib diisi'),
+  identifier: z.string().trim().min(1, 'Email or username is required'),
   password: passwordSchema,
 });
 
@@ -36,7 +39,7 @@ export const updateProfileDetailSchema = z.object({
 });
 
 export const updatePasswordSchema = z.object({
-  currentPassword: z.string().min(1, 'Masukkan password akun ini sekarang'),
+  currentPassword: z.string().min(1, 'Enter your current account password'),
   newPassword: passwordSchema,
 });
 

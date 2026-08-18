@@ -28,13 +28,13 @@ export default function DeleteVault({ id }: { id: string }) {
     try {
       const { error } = await deleteVaultItem(id);
       if (error) {
-        toast('Gagal hapus vault');
+        toast('Failed to delete vault');
         return;
       }
-      toast('Berhasil hapus vault');
+      toast('Vault deleted successfully');
       setOpen(false);
     } catch {
-      toast('Gagal hapus vault');
+      toast('Failed to delete vault');
     } finally {
       setLoading(false);
     }

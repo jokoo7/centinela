@@ -4,6 +4,7 @@ import CenteredFormLayout from '@/components/wrapped-form';
 
 export const metadata: Metadata = {
   title: 'Register',
+  description: 'Join now and take control of your digital security.',
 };
 
 export default function RegisterPage() {

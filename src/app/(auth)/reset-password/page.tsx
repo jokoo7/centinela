@@ -1,5 +1,11 @@
+import { Metadata } from 'next';
 import ResetPasswordForm from './reset-password-form';
 import CenteredFormLayout from '@/components/wrapped-form';
+
+export const metadata: Metadata = {
+  title: 'Reset Password',
+  description: 'Enter your new password below.',
+};
 
 export default async function ResetPasswordPage({
   searchParams,
@@ -15,8 +21,8 @@ export default async function ResetPasswordPage({
       ) : (
         <p className="text-red-600">
           {error === 'INVALID_TOKEN'
-            ? 'Link reset password sudah kedaluwarsa atau tidak valid. Silakan minta link baru.'
-            : 'Token tidak ditemukan.'}
+            ? 'The password reset link has expired or is invalid. Please request a new one.'
+            : 'Token not found.'}
         </p>
       )}
     </CenteredFormLayout>

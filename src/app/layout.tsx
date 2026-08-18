@@ -3,6 +3,7 @@ import { Architects_Daughter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import { SignOutOverlay } from '@/components/signout-overlay';
+import { cn } from '@/lib/utils';
 
 const fontSans = Architects_Daughter({
   subsets: ['latin'],
@@ -11,10 +12,12 @@ const fontSans = Architects_Daughter({
 });
 
 export const metadata: Metadata = {
-  title: 'Centinela App',
-  description: 'Web untuk enyimpan data rahasia anda',
+  title: {
+    default: 'Centinela App',
+    template: '%s | Centinela',
+  },
+  description: 'A secure place to store your sensitive data',
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={` ${fontSans.variable} antialiased`}>
+      <body className={cn('antialiased', fontSans.variable)}>
         {children}
         <Toaster
           toastOptions={{

@@ -41,12 +41,12 @@ export default function DeleteAccount() {
       });
 
       if (error) {
-        toast(error.message ?? 'Gagal mengirim email konfirmasi.');
+        toast(error.message ?? 'Failed to send the confirmation email.');
         return;
       }
 
       lock();
-      toast('Cek your email forn confirmation delete account');
+      toast('Check your email for the account deletion confirmation.');
       setSent(true);
     });
   }
@@ -55,10 +55,10 @@ export default function DeleteAccount() {
     return (
       <Card className="ring-destructive/50">
         <CardHeader>
-          <CardTitle>Cek email kamu</CardTitle>
+          <CardTitle>Check your email</CardTitle>
           <CardDescription>
-            Kami sudah kirim link konfirmasi ke email kamu. Klik link tersebut untuk menyelesaikan
-            penghapusan akun.
+            We&apos;ve sent a confirmation link to your email. Click the link to complete the
+            account deletion.
           </CardDescription>
         </CardHeader>
       </Card>

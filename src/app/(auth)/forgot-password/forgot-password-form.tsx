@@ -29,7 +29,7 @@ export default function ForgotPasswordForm() {
         {
           onSuccess: () => {
             setSuccess(
-              'Jika akun terdaftar, link reset sudah dikirim. Tidak menerima email dalam 5 menit? Coba kirim ulang.',
+              'If your account is registered, a password reset link has been sent. Didn’t receive the email within 5 minutes? Try sending it again.',
             );
             form.reset();
           },

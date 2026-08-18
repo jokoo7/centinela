@@ -37,7 +37,7 @@ export default function UnlockVault({ user }: { user: User }) {
           user.encryptedVaultKeyIv!,
         );
       } catch {
-        toast('Master password salah');
+        toast('Incorrect master password');
       } finally {
         setDialogOpen(false);
         form.reset();
@@ -97,7 +97,6 @@ export default function UnlockVault({ user }: { user: User }) {
               </form.Subscribe>
             </FieldGroup>
           </form>
-          {/* <DialogFooter></DialogFooter> */}
         </DialogContent>
       </form>
     </Dialog>

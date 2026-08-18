@@ -36,13 +36,13 @@ export default function VaultCard({ vault, Icon, onView, onEdit, onTogglePin }: 
           {(vault.type === 'ACCOUNT' && vault.data.email) ||
             (vault.type === 'ACCOUNT' && vault.data.username) ||
             (vault.type === 'ACCOUNT' && vault.data.phone) ||
-            'Detail informasi tersimpan'}
+            'Stored information details'}
         </p>
         <div className="flex items-center gap-2">
           <Badge className="text-xs" variant="secondary">
             {vault.type === 'ACCOUNT' ? '🔐Account' : '📝Note'}
           </Badge>
-          <p className="text-xs">Diperbarui {formatRelativeDate(vault.updatedAt)}</p>
+          <p className="text-xs">Updated {formatRelativeDate(vault.updatedAt)}</p>
         </div>
       </CardContent>
       <CardFooter

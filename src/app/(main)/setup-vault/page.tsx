@@ -2,6 +2,13 @@ import CenteredFormLayout from '@/components/wrapped-form';
 import SetupVaultForm from './setup-vault-form';
 import { getServerSession } from '@/lib/get-session';
 import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Create Your Vault',
+  description: 'Set a strong master password to secure your data.',
+  robots: { index: false, follow: false },
+};
 
 export default async function SetupUnlockPage() {
   const session = await getServerSession();

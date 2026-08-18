@@ -6,33 +6,29 @@ const pinPattern = /^\d{4,12}$/;
 
 export const masterPasswordSchema = z
   .string()
-  .min(8, 'Master password minimal 8 karakter')
-  .regex(/^[^-]*$/, 'Master password tidak boleh mengandung -');
+  .min(8, 'Master password must be at least 8 characters')
+  .regex(/^[^-]*$/, 'Master password cannot contain -');
 
 export const accountDataSchema = z
   .object({
-    email: z.string().trim().pipe(z.email('Format email tidak valid')).optional().or(z.literal('')),
+    email: z.string().trim().pipe(z.email('Invalid email format')).optional().or(z.literal('')),
     username: z.string().trim().optional(),
     phone: z
       .string()
       .trim()
-      .regex(phonePattern, 'Format nomor telepon tidak valid')
+      .regex(phonePattern, 'Invalid phone number format')
       .optional()
       .or(z.literal('')),
 
     password: z.string().optional(),
-    pin: z
-      .string()
-      .regex(pinPattern, 'PIN harus berupa 4-12 digit angka')
-      .optional()
-      .or(z.literal('')),
+    pin: z.string().regex(pinPattern, 'PIN must be 4-12 digits').optional().or(z.literal('')),
 
-    notes: z.string().trim().max(2000, 'Catatan maksimal 2000 karakter').optional(),
+    notes: z.string().trim().max(2000, 'Notes must be at most 2,000 characters').optional(),
   })
   .superRefine((data, ctx) => {
     const hasIdentifier = Boolean(data.email || data.username || data.phone);
     if (!hasIdentifier) {
-      const message = 'Minimal isi salah satu: email, username, atau nomor telepon';
+      const message = 'Please provide at least one: email, username, or phone number';
       ctx.addIssue({ code: 'custom', message, path: ['email'] });
       ctx.addIssue({ code: 'custom', message, path: ['username'] });
       ctx.addIssue({ code: 'custom', message, path: ['phone'] });
@@ -40,7 +36,7 @@ export const accountDataSchema = z
 
     const hasCredential = Boolean(data.password || data.pin);
     if (!hasCredential) {
-      const message = 'Minimal isi salah satu: password atau PIN';
+      const message = 'Please provide at least one: password or PIN';
       ctx.addIssue({ code: 'custom', message, path: ['password'] });
       ctx.addIssue({ code: 'custom', message, path: ['pin'] });
     }
@@ -50,15 +46,15 @@ export const noteDataSchema = z.object({
   content: z
     .string()
     .trim()
-    .max(10_000, 'Catatan maksimal 10.000 karakter')
+    .max(10_000, 'Notes must be at most 10,000 characters')
     .refine((val) => val.length > 0, {
-      error: 'Isi catatan tidak boleh kosong',
+      error: 'Note content cannot be empty',
     }),
 });
 
 export const metadataSchema = z.object({
-  title: z.string().trim().min(1, 'Title wajib diisi.').max(100, 'Maksimal 100 karakter'),
-  url: z.string().trim().pipe(z.url('Format URL tidak valid')).optional().or(z.literal('')),
+  title: z.string().trim().min(1, 'Title is required.').max(100, 'Maximum 100 characters'),
+  url: z.string().trim().pipe(z.url('Invalid URL format')).optional().or(z.literal('')),
   pinned: z.boolean(),
 });
 
@@ -76,10 +72,10 @@ export const vaultItemFormSchema = z.discriminatedUnion('type', [
 export const setupMasterPasswordSchema = z
   .object({
     masterPassword: masterPasswordSchema,
-    confirmMasterPassword: z.string().min(1, 'Konfirmasi password wajib diisi'),
+    confirmMasterPassword: z.string().min(1, 'Password confirmation is required'),
   })
   .refine((data) => data.masterPassword === data.confirmMasterPassword, {
-    error: 'Konfirmasi password tidak cocok',
+    error: 'Passwords do not match',
     path: ['confirmMasterPassword'],
   });
 
@@ -88,7 +84,7 @@ export const unlockVaultSchema = z.object({
 });
 
 export const updateMasterPasswordSchema = z.object({
-  currentMasterPassword: z.string().min(1, 'Masuukan master password anda saat ini'),
+  currentMasterPassword: z.string().min(1, 'Enter your current master password'),
   newMasterPassword: masterPasswordSchema,
 });
 

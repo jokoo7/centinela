@@ -8,6 +8,13 @@ import PasswordForm from './password-form';
 import MasterPasswordForm from './master-password-form';
 import ResetMasterPassword from './reset-master-password';
 import DeleteAccount from './delete-account';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Account Settings',
+  description: 'Manage your account information and security settings.',
+  robots: { index: false, follow: false },
+};
 
 export default async function AccountPage() {
   const session = await getServerSession();

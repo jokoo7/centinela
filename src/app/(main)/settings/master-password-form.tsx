@@ -59,7 +59,7 @@ export default function MasterPasswordForm({ user }: { user: User }) {
           user.encryptedVaultKeyIv!,
         );
       } catch {
-        setError('Master password saat ini salah.');
+        setError('The current master password is incorrect.');
         return;
       }
 
@@ -73,11 +73,11 @@ export default function MasterPasswordForm({ user }: { user: User }) {
         const { error } = await updateMasterPassword(encryptedVaultKey, encryptedVaultKeyIv);
 
         if (error) {
-          setError('Master password gagal diubah');
+          setError('Failed to change the master password.');
           return;
         }
 
-        toast('Master password berhasil diubah.');
+        toast('Master password changed successfully.');
         form.reset();
         router.refresh();
       } catch (err) {

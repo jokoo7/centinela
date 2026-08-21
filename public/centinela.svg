@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <mask id="keyhole">
+      <rect x="0" y="0" width="64" height="64" fill="white"/>
+      <circle cx="32" cy="26" r="4.2" fill="black"/>
+      <polygon points="29.2,29 34.8,29 33,40 31,40" fill="black"/>
+    </mask>
+  </defs>
+  <path d="M32,4 L54,12 L54,30 C54,44 45,54 32,60 C19,54 10,44 10,30 L10,12 Z"
+        fill="#0f766e" mask="url(#keyhole)"/>
+</svg>

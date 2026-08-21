@@ -43,7 +43,7 @@ export default function RegisterForm({ className, ...props }: React.ComponentPro
         {
           onSuccess: () => {
             toast('Register successfully');
-            router.push('/verify-email');
+            router.push(`/verify-email?email=${encodeURIComponent(value.email)}`);
           },
           onError: (ctx) => {
             setError(ctx.error.message || 'Something went wrong');

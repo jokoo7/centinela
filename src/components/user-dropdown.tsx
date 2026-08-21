@@ -10,7 +10,7 @@ import {
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
 import Link from 'next/link';
-import { FolderKey, Loader2, LogOutIcon, Settings, User2 } from 'lucide-react';
+import { Loader2, LogOutIcon, Settings, User2, Vault } from 'lucide-react';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -61,7 +61,7 @@ export default function UserDropdown({ user }: { user: User }) {
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/vault">
-              <FolderKey />
+              <Vault />
               Vault
             </Link>
           </DropdownMenuItem>

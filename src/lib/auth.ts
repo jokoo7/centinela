@@ -6,6 +6,7 @@ import { generateSalt } from './crypto/encoding';
 import { nextCookies } from 'better-auth/next-js';
 import { sendEmail } from './email';
 import { createAuthMiddleware, getSessionFromCtx } from 'better-auth/api';
+import { cookies } from 'next/headers';
 
 const pendingEmailChanges = new Map();
 
@@ -62,6 +63,17 @@ export const auth = betterAuth({
 
       beforeDelete: async (user) => {
         await prisma.vaultItem.deleteMany({ where: { userId: user.id } });
+      },
+
+      afterDelete: async () => {
+        const cookieStore = await cookies();
+        cookieStore.set('goodbye_token', crypto.randomUUID(), {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'lax',
+          maxAge: 30,
+          path: '/goodbye',
+        });
       },
     },
     additionalFields: {

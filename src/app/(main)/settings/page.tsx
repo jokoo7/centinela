@@ -1,4 +1,4 @@
-import { UserIcon } from 'lucide-react';
+import { UserRoundCog } from 'lucide-react';
 import { getServerSession } from '@/lib/get-session';
 import { redirect } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,10 +28,10 @@ export default async function AccountPage() {
     <div className="space-y-6">
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-xl font-semibold">
-          <UserIcon className="size-5" />
-          Account Information
+          <UserRoundCog className="size-5" />
+          Account Settings
         </div>
-        <p className="text-muted-foreground">Welcome back! Here&apos;s your account overview.</p>
+        <p className="text-muted-foreground">Holla! Here&apos;s your account settings.</p>
       </div>
 
       <Tabs defaultValue="general">

@@ -2,7 +2,16 @@
 
 import { Button } from '@/components/ui/button';
 import VaultForm from './vault-form';
-import { FileText, FolderKey, Pin, Plus, Search, UserRound, UserRoundKey } from 'lucide-react';
+import {
+  FileText,
+  FolderKey,
+  LockKeyhole,
+  Pin,
+  Plus,
+  Search,
+  UserRound,
+  UserRoundKey,
+} from 'lucide-react';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { AccountData, NoteData, DecryptedVaultItem, VaultItemType } from '@/types/vault-type';
 import { useEffect, useMemo, useOptimistic, useState, useTransition } from 'react';
@@ -143,7 +152,7 @@ export default function VaultClient({
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <FolderKey />
+            <LockKeyhole />
           </EmptyMedia>
           <EmptyTitle>Vault Locked</EmptyTitle>
           <EmptyDescription>

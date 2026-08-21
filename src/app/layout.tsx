@@ -17,7 +17,11 @@ export const metadata: Metadata = {
     template: '%s | Centinela',
   },
   description: 'A secure place to store your sensitive data',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
+
 export default function RootLayout({
   children,
 }: Readonly<{

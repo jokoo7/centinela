@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils';
 import WrapperContent from './wrapper-content';
-import { UserRoundKey } from 'lucide-react';
 import { getServerSession } from '@/lib/get-session';
 import UserDropdown from './user-dropdown';
+import Image from 'next/image';
 
 export default async function Navbar() {
   const session = await getServerSession();
@@ -18,7 +18,13 @@ export default async function Navbar() {
     >
       <WrapperContent className="flex justify-between gap-6 py-3">
         <div className="flex items-center gap-1">
-          <UserRoundKey className="h-5 w-5 shrink-0 text-primary" />
+          <Image
+            className="h-5 w-5 shrink-0"
+            src="/centinela.svg"
+            width={100}
+            height={100}
+            alt="Logo centinela"
+          />
           <span className="text-lg font-light text-foreground">Centinela</span>
         </div>
 

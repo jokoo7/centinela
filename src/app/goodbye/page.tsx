@@ -1,5 +1,5 @@
-import { getServerSession } from '@/lib/get-session';
 import { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
@@ -9,9 +9,12 @@ export const metadata: Metadata = {
 };
 
 export default async function GoodbyePage() {
-  const session = await getServerSession();
-  const user = session?.user;
-  if (user) redirect('/vault');
+  const cookieStore = await cookies();
+  const token = cookieStore.get('goodbye_token');
+
+  if (!token) {
+    redirect('/');
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-50 px-4 text-center">
